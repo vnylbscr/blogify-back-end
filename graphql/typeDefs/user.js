@@ -83,9 +83,10 @@ const userResolvers = {
                     { expiresIn: "4d" }
                 );
                 return {
-                    ...res._doc,
+                    name: res.username,
                     id: res._id,
                     token: authToken,
+                    ...res._doc,
                 };
             }
         },
