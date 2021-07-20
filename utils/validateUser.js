@@ -33,7 +33,8 @@ const validateLoginInputs = (email, password) => {
         const emailRegex =
             /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         if (!emailRegex.test(email)) {
-            errors.email = "E-mail adresi geçerli bir e-mail adresi olmalıdır";
+            errors.email =
+                "E-mail adresi geçerli bir e-mail adresi olmalıdır. Lütfen bilgileri kontrol edin.";
         }
     }
     return {
