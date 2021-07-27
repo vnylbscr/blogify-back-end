@@ -36,7 +36,7 @@ const userTypeDefs = gql`
 const userResolvers = {
     Mutation: {
         // REGISTER USER
-        register: async (_, args, context) => {
+        register: async (parent, args, context, info) => {
             console.log(args);
             const { username, email, password } = args.input;
 
@@ -91,7 +91,7 @@ const userResolvers = {
             }
         },
         // LOGIN USER
-        login: async (_, args, context) => {
+        login: async (parent, args, context, info) => {
             const { email, password } = args.input;
             const user = await User.findOne({ email });
             if (!user) {

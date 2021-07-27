@@ -1,5 +1,5 @@
 const express = require("express");
-const { ApolloServer, gql } = require("apollo-server-express");
+const { ApolloServer, gql, UserInputError } = require("apollo-server-express");
 const cors = require("cors");
 require("dotenv").config();
 const mongoose = require("mongoose");
@@ -14,23 +14,12 @@ const {
     commentResolvers,
 } = require("./graphql/typeDefs/comment");
 const PORT = process.env.PORT || 4000;
-const books = [
-    {
-        id: 1,
-        name: "mert 1",
-    },
-    {
-        id: 2,
-        name: "kitap 2",
-    },
-];
 
 async function startApolloServer() {
     // Construct a schema, using GraphQL schema language
     const typeDefs = gql`
         type Query {
             hello: String
-            books: [Book]
         }
         type Book {
             id: ID!
@@ -52,7 +41,6 @@ async function startApolloServer() {
     const resolvers = {
         Query: {
             hello: () => "Hello world!",
-            books: () => books,
         },
     };
 
@@ -72,6 +60,12 @@ async function startApolloServer() {
             authorResolvers,
             commentResolvers,
         ],
+        context: ({ req }) => {
+            const user = req.user || null;
+            if (user) {
+                return new UserInputError("Kullanıcı Bulunamadı");
+            } else return { user };
+        },
     });
     // Server Start
     await server.start();
