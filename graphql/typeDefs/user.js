@@ -3,6 +3,7 @@ const { validateRegisterInputs } = require("../../utils/validateUser");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../../Models/user");
+const { SO_SECRET_KEY } = require("../../utils/config");
 const userTypeDefs = gql`
     type User {
         id: ID!
@@ -79,7 +80,7 @@ const userResolvers = {
                         email: res.email,
                         username: res.username,
                     },
-                    "Secret Key",
+                    SO_SECRET_KEY,
                     { expiresIn: "4d" }
                 );
                 return {
@@ -111,7 +112,7 @@ const userResolvers = {
                             email: user.email,
                             username: user.username,
                         },
-                        "Secret Key",
+                        SO_SECRET_KEY,
                         { expiresIn: "4d" }
                     );
                     return {
