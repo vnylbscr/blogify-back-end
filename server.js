@@ -1,5 +1,10 @@
 const express = require("express");
-const { ApolloServer, gql } = require("apollo-server-express");
+const {
+    ApolloServer,
+    gql,
+    UserInputError,
+    AuthenticationError,
+} = require("apollo-server-express");
 const cors = require("cors");
 require("dotenv").config();
 const mongoose = require("mongoose");
@@ -13,24 +18,23 @@ const {
     commentTypeDefs,
     commentResolvers,
 } = require("./graphql/typeDefs/comment");
+const jwt = require("jsonwebtoken");
+const { SO_SECRET_KEY } = require("./utils/config");
 const PORT = process.env.PORT || 4000;
-const books = [
-    {
-        id: 1,
-        name: "mert 1",
-    },
-    {
-        id: 2,
-        name: "kitap 2",
-    },
-];
 
+const getUser = (token) => {
+    if (!token) {
+        return null;
+    }
+    const user = jwt.verify(token, SO_SECRET_KEY);
+    console.log("user", user);
+    return user;
+};
 async function startApolloServer() {
     // Construct a schema, using GraphQL schema language
     const typeDefs = gql`
         type Query {
             hello: String
-            books: [Book]
         }
         type Book {
             id: ID!
@@ -52,7 +56,6 @@ async function startApolloServer() {
     const resolvers = {
         Query: {
             hello: () => "Hello world!",
-            books: () => books,
         },
     };
 
@@ -72,6 +75,16 @@ async function startApolloServer() {
             authorResolvers,
             commentResolvers,
         ],
+        context: ({ req }) => {
+            const token = req.headers.authorization || "";
+            const user = getUser(token);
+            if (!user) {
+                throw new AuthenticationError(
+                    "Bu işlemi yapmak için giriş yapmış olmalısınız"
+                );
+            }
+            return { user };
+        },
     });
     // Server Start
     await server.start();

@@ -3,6 +3,7 @@ const { validateRegisterInputs } = require("../../utils/validateUser");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../../Models/user");
+const { SO_SECRET_KEY } = require("../../utils/config");
 const userTypeDefs = gql`
     type User {
         id: ID!
@@ -36,7 +37,7 @@ const userTypeDefs = gql`
 const userResolvers = {
     Mutation: {
         // REGISTER USER
-        register: async (_, args, context) => {
+        register: async (parent, args, context, info) => {
             console.log(args);
             const { username, email, password } = args.input;
 
@@ -79,18 +80,19 @@ const userResolvers = {
                         email: res.email,
                         username: res.username,
                     },
-                    "Secret Key",
+                    SO_SECRET_KEY,
                     { expiresIn: "4d" }
                 );
                 return {
-                    ...res._doc,
+                    name: res.username,
                     id: res._id,
                     token: authToken,
+                    ...res._doc,
                 };
             }
         },
         // LOGIN USER
-        login: async (_, args, context) => {
+        login: async (parent, args, context, info) => {
             const { email, password } = args.input;
             const user = await User.findOne({ email });
             if (!user) {
@@ -110,7 +112,7 @@ const userResolvers = {
                             email: user.email,
                             username: user.username,
                         },
-                        "Secret Key",
+                        SO_SECRET_KEY,
                         { expiresIn: "4d" }
                     );
                     return {
