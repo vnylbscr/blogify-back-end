@@ -1,12 +1,14 @@
 var mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const postSchema = new Schema({
-    author: [Schema.Types.Mixed],
     ownerId: Schema.Types.ObjectId,
     title: { type: String, defaultValue: null },
-    subTitle: String,
+    subtitle: String,
+    content: String,
     comments: [Schema.Types.Mixed],
-    createdAt: new Date(),
+    media: String,
+    category: Schema.Types.Mixed,
+    createdAt: String,
 });
 
 const Post = mongoose.model("Post", postSchema);

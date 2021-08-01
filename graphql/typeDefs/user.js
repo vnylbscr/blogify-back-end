@@ -26,6 +26,7 @@ const userTypeDefs = gql`
     # Get User With ID
     extend type Query {
         getUser(userID: ID!): User!
+        getMeWithToken(token: String!): User!
     }
     # Mutations For User Auth
     type Mutation {
@@ -35,6 +36,21 @@ const userTypeDefs = gql`
 `;
 
 const userResolvers = {
+    Query: {
+        getMeWithToken: async (parent, args, context, _) => {
+            const { token } = args;
+            if (!token) {
+                return null;
+            }
+            const user = jwt.verify(token, SO_SECRET_KEY);
+            const res = await User.findOne({ email: user.email });
+            return {
+                id: res._id,
+                name: res.username,
+                ...res._doc,
+            };
+        },
+    },
     Mutation: {
         // REGISTER USER
         register: async (parent, args, context, info) => {
@@ -105,22 +121,25 @@ const userResolvers = {
                     user.password
                 );
 
-                if (isValidPassword) {
-                    const authToken = jwt.sign(
-                        {
-                            id: user._id,
-                            email: user.email,
-                            username: user.username,
-                        },
-                        SO_SECRET_KEY,
-                        { expiresIn: "4d" }
+                if (!isValidPassword) {
+                    throw new UserInputError(
+                        "E-mail ya da şifre hatalı. Lütfen bilgileri kontrol edin."
                     );
-                    return {
-                        ...user._doc,
-                        id: user._id,
-                        token: authToken,
-                    };
                 }
+                const authToken = jwt.sign(
+                    {
+                        id: user._id,
+                        email: user.email,
+                        username: user.username,
+                    },
+                    SO_SECRET_KEY,
+                    { expiresIn: "4d" }
+                );
+                return {
+                    ...user._doc,
+                    id: user._id,
+                    token: authToken,
+                };
             }
         },
     },

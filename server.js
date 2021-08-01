@@ -20,16 +20,9 @@ const {
 } = require("./graphql/typeDefs/comment");
 const jwt = require("jsonwebtoken");
 const { SO_SECRET_KEY } = require("./utils/config");
+const { Auth } = require("./middleware/auth");
 const PORT = process.env.PORT || 4000;
 
-const getUser = (token) => {
-    if (!token) {
-        return null;
-    }
-    const user = jwt.verify(token, SO_SECRET_KEY);
-    console.log("user", user);
-    return user;
-};
 async function startApolloServer() {
     // Construct a schema, using GraphQL schema language
     const typeDefs = gql`
@@ -75,24 +68,34 @@ async function startApolloServer() {
             authorResolvers,
             commentResolvers,
         ],
-        context: ({ req }) => {
-            const token = req.headers.authorization || "";
-            const user = getUser(token);
-            if (!user) {
-                throw new AuthenticationError(
-                    "Bu işlemi yapmak için giriş yapmış olmalısınız"
-                );
-            }
-            return { user };
-        },
+        context: Auth,
     });
     // Server Start
     await server.start();
     const app = express();
-    app.use(cors());
+    // cors options
+    app.use(
+        cors({
+            origin: [
+                "http://localhost:3000",
+                "https://studio.apollographql.com",
+            ],
+        })
+    );
     app.get("/", (req, res) => {
         res.redirect("/graphql");
     });
+    // Auth Middleware
+    // app.use((req, res, next) => {
+    //     const fullToken = req.headers.authorization;
+    //     if (!fullToken) {
+    //         res.status(400).json({
+    //             message: "Token bulunamadı",
+    //         });
+    //     } else {
+    //         next();
+    //     }
+    // });
     // Apply Middlaware
     server.applyMiddleware({ app });
     await new Promise((resolve) => app.listen({ port: PORT }, resolve));

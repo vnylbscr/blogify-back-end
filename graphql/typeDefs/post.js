@@ -1,4 +1,9 @@
-const { gql } = require("apollo-server-express");
+const {
+    gql,
+    AuthenticationError,
+    UserInputError,
+} = require("apollo-server-express");
+const Post = require("../../Models/post");
 
 const postTypeDefs = gql`
     type Post {
@@ -12,13 +17,73 @@ const postTypeDefs = gql`
         category: [String]!
         createdAt: String
     }
+    input PostInput {
+        ownerId: ID!
+        title: String!
+        subtitle: String
+        content: String!
+        media: String!
+        cetegory: [String]
+        createdAt: String!
+    }
     extend type Query {
         getPost(id: ID!): Post!
         getAllPosts: [Post!]
     }
+    extend type Mutation {
+        addPost(input: PostInput): Post!
+    }
 `;
 
-const postResolvers = {};
+const postResolvers = {
+    Query: {
+        getAllPosts: async (_, __, context, info) => {
+            if (!context.isAuth) {
+                throw new AuthenticationError("Token bulunamadı");
+            }
+            const posts = await Post.find();
+            return posts;
+        },
+    },
+    Mutation: {
+        addPost: async (parent, args, context, info) => {
+            console.log(context);
+            if (!context.isAuth) {
+                throw new AuthenticationError("Token bulunamadı");
+            }
+            const {
+                ownerId,
+                title,
+                subtitle,
+                content,
+                comments,
+                media,
+                category,
+                createdAt,
+            } = args.input;
+
+            if (!ownerId || !title || !content || !createdAt) {
+                throw new UserInputError("Gerekli alanları lütfen doldurunuz.");
+            }
+
+            const newPost = new Post({
+                ownerId,
+                title,
+                subtitle,
+                content,
+                comments,
+                media,
+                category,
+                createdAt,
+            });
+            const res = await newPost.save();
+            return {
+                ...res._doc,
+                id: res.doc._id,
+            };
+        },
+    },
+};
 
 module.exports = {
     postTypeDefs,
