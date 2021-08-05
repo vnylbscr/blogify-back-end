@@ -1,4 +1,8 @@
-const { gql, UserInputError } = require("apollo-server-express");
+const {
+    gql,
+    UserInputError,
+    AuthenticationError,
+} = require("apollo-server-express");
 const { validateRegisterInputs } = require("../../utils/validateUser");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -38,17 +42,24 @@ const userTypeDefs = gql`
 const userResolvers = {
     Query: {
         getMeWithToken: async (parent, args, context, _) => {
-            const { token } = args;
-            if (!token) {
-                return null;
+            try {
+                const { token } = args;
+                if (!token) {
+                    return;
+                }
+                const user = jwt.verify(token, SO_SECRET_KEY);
+
+                const res = await User.findOne({ email: user.email });
+                return {
+                    id: res._id,
+                    name: res.username,
+                    ...res._doc,
+                };
+            } catch (error) {
+                throw new AuthenticationError(
+                    "Token geçersiz yada süresi dolmuş"
+                );
             }
-            const user = jwt.verify(token, SO_SECRET_KEY);
-            const res = await User.findOne({ email: user.email });
-            return {
-                id: res._id,
-                name: res.username,
-                ...res._doc,
-            };
         },
     },
     Mutation: {

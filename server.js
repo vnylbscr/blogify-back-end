@@ -86,16 +86,18 @@ async function startApolloServer() {
         res.redirect("/graphql");
     });
     // Auth Middleware
-    // app.use((req, res, next) => {
-    //     const fullToken = req.headers.authorization;
-    //     if (!fullToken) {
-    //         res.status(400).json({
-    //             message: "Token bulunamadı",
-    //         });
-    //     } else {
-    //         next();
-    //     }
-    // });
+    app.use((req, res, next) => {
+        // const fullToken = req.headers.authorization;
+        // if (!fullToken) {
+        //     res.status(400).json({
+        //         message: "Token bulunamadı",
+        //     });
+        // } else {
+        //     next();
+        // }
+        console.log("Header Token", req.headers.authorization);
+        next();
+    });
     // Apply Middlaware
     server.applyMiddleware({ app });
     await new Promise((resolve) => app.listen({ port: PORT }, resolve));
