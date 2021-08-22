@@ -1,4 +1,4 @@
-const { EMAILREGEX, PASSWORD_REGEX} = require('../lib/constants')
+const { EMAIL_REGEX, PASSWORD_REGEX } = require("../lib/constants");
 
 const validateRegisterInputs = (username, email, password) => {
     const errors = {};
@@ -11,9 +11,7 @@ const validateRegisterInputs = (username, email, password) => {
     if (email.trim() === "") {
         errors.email = "E-mail boş olamaz";
     } else {
-        const emailRegex =
-            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-        if (!EMAILREGEX.test(email)) {
+        if (!EMAIL_REGEX.test(email)) {
             errors.email = "E-mail adresi geçerli bir e-mail adresi olmalıdır";
         }
     }
@@ -32,8 +30,7 @@ const validateLoginInputs = (email, password) => {
     if (email.trim() === "") {
         errors.email = "E-mail boş olamaz";
     } else {
-        
-        if (!EMAILREGEX.test(email)) {
+        if (!EMAIL_REGEX.test(email)) {
             errors.email =
                 "E-mail adresi geçerli bir e-mail adresi olmalıdır. Lütfen bilgileri kontrol edin.";
         }

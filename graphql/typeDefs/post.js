@@ -3,7 +3,19 @@ const {
     AuthenticationError,
     UserInputError,
 } = require("apollo-server-express");
+const path = require("path");
 const Post = require("../../Models/post");
+const { loadSchemaSync } = require("@graphql-tools/load");
+const { GraphQLFileLoader } = require("@graphql-tools/graphql-file-loader");
+const { readFileSync } = require("fs");
+
+// // const postTypeDefs = loadSchemaSync(path.join(__dirname, "./post.graphql"), {
+// //     loaders: [new GraphQLFileLoader()],
+// // });
+
+// const postTypeDefs = readFileSync(path.join(__dirname, "./post.graphql"), {
+//     encoding: "utf-8",
+// });
 
 const postTypeDefs = gql`
     type Post {
@@ -62,7 +74,7 @@ const postResolvers = {
                 createdAt,
             } = args.input;
 
-            if (!ownerId || !title || !content || !createdAt) {
+            if (!ownerId || !title || !content) {
                 throw new UserInputError("Gerekli alanları lütfen doldurunuz.");
             }
 

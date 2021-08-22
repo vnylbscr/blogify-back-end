@@ -1,10 +1,5 @@
 const express = require("express");
-const {
-    ApolloServer,
-    gql,
-    UserInputError,
-    AuthenticationError,
-} = require("apollo-server-express");
+const { ApolloServer, gql } = require("apollo-server-express");
 const cors = require("cors");
 require("dotenv").config();
 const mongoose = require("mongoose");
@@ -48,7 +43,7 @@ async function startApolloServer() {
     // Resolvers
     const resolvers = {
         Query: {
-            hello: () => "Hello world!",
+            hello: () => "Hello World!",
         },
     };
 
@@ -70,6 +65,7 @@ async function startApolloServer() {
         ],
         context: Auth,
     });
+
     // Server Start
     await server.start();
     const app = express();
