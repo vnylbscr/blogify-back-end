@@ -13,8 +13,7 @@ const {
     commentTypeDefs,
     commentResolvers,
 } = require("./graphql/typeDefs/comment");
-const jwt = require("jsonwebtoken");
-const { SO_SECRET_KEY } = require("./utils/config");
+
 const { Auth } = require("./middleware/auth");
 const PORT = process.env.PORT || 4000;
 

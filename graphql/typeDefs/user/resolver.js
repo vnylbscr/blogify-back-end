@@ -3,41 +3,13 @@ const {
     UserInputError,
     AuthenticationError,
 } = require("apollo-server-express");
-const { validateRegisterInputs } = require("../../utils/validateUser");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const User = require("../../Models/user");
-const { SO_SECRET_KEY } = require("../../utils/config");
-const userTypeDefs = gql`
-    type User {
-        id: ID!
-        name: String
-        email: String
-        posts: [Post]
-        type: Int
-        createdAt: String
-        token: String
-    }
-    input RegisterInput {
-        username: String!
-        email: String!
-        password: String!
-    }
-    input LoginInput {
-        email: String!
-        password: String!
-    }
-    # Get User With ID
-    extend type Query {
-        getUser(userID: ID!): User!
-        getMeWithToken(token: String!): User!
-    }
-    # Mutations For User Auth
-    type Mutation {
-        register(input: RegisterInput): User!
-        login(input: LoginInput): User!
-    }
-`;
+
+const User = require("../../../Models/user");
+const { SO_SECRET_KEY } = require("../../../utils/config");
+const { validateRegisterInputs } = require("../../../utils/validateUser");
+const { validateLoginInputs } = require("../../../utils/validateUser");
 
 const userResolvers = {
     Query: {
@@ -153,10 +125,16 @@ const userResolvers = {
                 };
             }
         },
+        editProfile: async (_, args, context, __) => {
+            if (!context.isAuth) {
+                throw new AuthenticationError("Token bulunamadı");
+            }
+
+            const doc = await User.findOneAndUpdate({
+                ...args,
+            });
+        },
     },
 };
 
-module.exports = {
-    userTypeDefs,
-    userResolvers,
-};
+module.exports = userResolvers;
