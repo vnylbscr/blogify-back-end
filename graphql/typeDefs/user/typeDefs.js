@@ -2,22 +2,19 @@ const { gql } = require("apollo-server-express");
 
 const userTypeDefs = gql`
     type User {
-        id: ID!
-        name: String
+        _id: ID!
+        username: String
         email: String
         posts: [Post]
-        type: Int
         createdAt: String
         token: String
-        information: UserInformation
         avatar: String
+        job: String
+        school: String
+        postCount: Int
+        about: String
     }
-    type UserInformation {
-        job: String!
-        school: String!
-        postCount: Int!
-        about: String!
-    }
+
     input RegisterInput {
         username: String!
         email: String!

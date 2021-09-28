@@ -68,15 +68,7 @@ async function startApolloServer() {
     // Server Start
     await server.start();
     const app = express();
-    // cors options
-    // app.use(
-    //     cors({
-    //         origin: [
-    //             "http://localhost:3006",
-    //             "https://studio.apollographql.com",
-    //         ],
-    //     })
-    // );
+
     app.get("/", (req, res) => {
         res.redirect("/graphql");
     });

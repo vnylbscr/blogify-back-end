@@ -8,35 +8,24 @@ const Post = require("../../Models/post");
 const { loadSchemaSync } = require("@graphql-tools/load");
 const { GraphQLFileLoader } = require("@graphql-tools/graphql-file-loader");
 const { readFileSync } = require("fs");
-
-// // const postTypeDefs = loadSchemaSync(path.join(__dirname, "./post.graphql"), {
-// //     loaders: [new GraphQLFileLoader()],
-// // });
-
-// const postTypeDefs = readFileSync(path.join(__dirname, "./post.graphql"), {
-//     encoding: "utf-8",
-// });
+const { default: slugify } = require("slugify");
 
 const postTypeDefs = gql`
     type Post {
-        id: ID!
+        _id: ID!
         title: String!
-        subtitle: String
-        content: String!
-        media: [String]
-        author: Author!
-        comments: [Comment!]
-        category: [String]!
+        content: String
+        author: Author
+        comments: [Comment]
+        category: [String]
         createdAt: String
+        slug: String
     }
     input PostInput {
-        ownerId: ID!
+        userId: ID!
         title: String!
-        subtitle: String
         content: String!
-        media: String!
         cetegory: [String]
-        createdAt: String!
     }
     extend type Query {
         getPost(id: ID!): Post!
@@ -60,38 +49,27 @@ const postResolvers = {
     Mutation: {
         addPost: async (parent, args, context, info) => {
             console.log(context);
-            if (!context.isAuth) {
-                throw new AuthenticationError("Token bulunamadı");
-            }
-            const {
-                ownerId,
-                title,
-                subtitle,
-                content,
-                comments,
-                media,
-                category,
-                createdAt,
-            } = args.input;
+            // if (!context.isAuth) {
+            //     throw new AuthenticationError("Token not found.");
+            // }
+            const { userId, title, content, category } = args.input;
 
-            if (!ownerId || !title || !content) {
-                throw new UserInputError("Gerekli alanları lütfen doldurunuz.");
+            if (!title || !content) {
+                throw new UserInputError("please fill required fields.");
             }
 
             const newPost = new Post({
-                ownerId,
+                user: userId,
                 title,
-                subtitle,
                 content,
-                comments,
-                media,
                 category,
-                createdAt,
+                slug: slugify(title),
             });
+
             const res = await newPost.save();
+
             return {
                 ...res._doc,
-                id: res.doc._id,
             };
         },
     },
