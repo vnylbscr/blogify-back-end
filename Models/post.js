@@ -3,6 +3,10 @@ const Schema = mongoose.Schema;
 const postSchema = new Schema(
     {
         title: { type: String, defaultValue: null },
+        subtitle: {
+            type: String,
+            defaultValue: null,
+        },
         content: String,
         comments: {
             type: Schema.Types.ObjectId,

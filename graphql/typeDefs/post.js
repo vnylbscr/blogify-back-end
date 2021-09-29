@@ -68,7 +68,8 @@ const postResolvers = {
             if (!context.isAuth) {
                 throw new AuthenticationError(TOKEN_NOT_FOUND);
             }
-            const { userId, title, content, category } = args.input;
+            const { userId, title, subtitle, photo, content, category } =
+                args.input;
 
             if (!title || !content) {
                 throw new UserInputError("please fill required fields.");
