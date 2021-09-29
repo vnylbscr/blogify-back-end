@@ -4,7 +4,7 @@ const commentTypeDefs = gql`
     type Comment {
         _id: ID
         content: String
-        likedCount: [Int]
+        likedCount: Int
         createdAt: String
     }
     extend type Query {

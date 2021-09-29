@@ -7,6 +7,10 @@ const postSchema = new Schema(
             type: String,
             defaultValue: null,
         },
+        image: {
+            type: String,
+            defaultValue: null,
+        },
         content: String,
         comments: {
             type: Schema.Types.ObjectId,

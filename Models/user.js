@@ -13,6 +13,18 @@ const userSchema = new Schema(
         },
         posts: [Schema.Types.Mixed],
         password: { type: String, required: true },
+        twitterUrl: {
+            type: String,
+            defaultValue: null,
+        },
+        githubUrl: {
+            type: String,
+            defaultValue: null,
+        },
+        instagramUrl: {
+            type: String,
+            defaultValue: null,
+        },
         aboutMe: {
             type: String,
             defaultValue: null,

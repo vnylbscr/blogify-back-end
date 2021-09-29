@@ -14,6 +14,9 @@ const userTypeDefs = gql`
         job: String
         school: String
         gender: String
+        instagramUrl: String
+        twitterUrl: String
+        githubUrl: String
         createdAt: String
     }
 
@@ -35,6 +38,9 @@ const userTypeDefs = gql`
         phone: String
         aboutMe: String
         gender: String
+        instagramUrl: String
+        twitterUrl: String
+        githubUrl: String
     }
     # Get User With ID
     extend type Query {

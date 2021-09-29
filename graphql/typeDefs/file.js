@@ -12,4 +12,3 @@ module.exports = {
     fileTypeDefs,
     resolvers,
 };
-dd
