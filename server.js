@@ -6,10 +6,6 @@ const mongoose = require("mongoose");
 const { userResolvers, userTypeDefs } = require("./graphql/typeDefs/user");
 const { postTypeDefs, postResolvers } = require("./graphql/typeDefs/post");
 const {
-    authorTypeDefs,
-    authorResolvers,
-} = require("./graphql/typeDefs/author");
-const {
     commentTypeDefs,
     commentResolvers,
 } = require("./graphql/typeDefs/comment");
@@ -48,20 +44,8 @@ async function startApolloServer() {
 
     // Type Defs and Resolvers
     const server = new ApolloServer({
-        typeDefs: [
-            typeDefs,
-            userTypeDefs,
-            postTypeDefs,
-            authorTypeDefs,
-            commentTypeDefs,
-        ],
-        resolvers: [
-            resolvers,
-            userResolvers,
-            postResolvers,
-            authorResolvers,
-            commentResolvers,
-        ],
+        typeDefs: [typeDefs, userTypeDefs, postTypeDefs, commentTypeDefs],
+        resolvers: [resolvers, userResolvers, postResolvers, commentResolvers],
         context: Auth,
     });
 

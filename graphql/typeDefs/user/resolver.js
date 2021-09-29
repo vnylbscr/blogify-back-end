@@ -5,6 +5,7 @@ const {
 } = require("apollo-server-express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { TOKEN_NOT_FOUND } = require("../../../lib/constants");
 
 const User = require("../../../Models/user");
 const { SO_SECRET_KEY } = require("../../../utils/config");
@@ -94,7 +95,7 @@ const userResolvers = {
             const user = await User.findOne({ email });
             if (!user) {
                 throw new UserInputError(
-                    "Böyle bir kullanıcı bulunamadı. Lütfen bilgileri kontrol edin."
+                    "User not found. Please check your informations."
                 );
             } else {
                 const isValidPassword = await bcrypt.compare(
@@ -104,9 +105,10 @@ const userResolvers = {
 
                 if (!isValidPassword) {
                     throw new UserInputError(
-                        "E-mail ya da şifre hatalı. Lütfen bilgileri kontrol edin."
+                        "E-mail or password is incorrect. Please check your informations."
                     );
                 }
+
                 const authToken = jwt.sign(
                     {
                         id: user._id,
@@ -125,7 +127,7 @@ const userResolvers = {
         },
         editProfile: async (_, args, context, __) => {
             if (!context.isAuth) {
-                throw new AuthenticationError("Token bulunamadı");
+                throw new AuthenticationError(TOKEN_NOT_FOUND);
             }
 
             const doc = await User.findOneAndUpdate({

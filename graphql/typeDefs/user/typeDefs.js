@@ -6,13 +6,15 @@ const userTypeDefs = gql`
         username: String
         email: String
         posts: [Post]
-        createdAt: String
         token: String
-        avatar: String
+        postCount: Int
+        photo: String
+        phone: String
+        aboutMe: String
         job: String
         school: String
-        postCount: Int
-        about: String
+        gender: String
+        createdAt: String
     }
 
     input RegisterInput {
@@ -25,15 +27,14 @@ const userTypeDefs = gql`
         password: String!
     }
     input UserPersonalInput {
+        username: String
         job: String
         school: String
-        postCount: Int
         about: String
-        avatar: String
-    }
-    input EditUserInput {
-        personalInfos: UserPersonalInput
-        name: String
+        photo: String
+        phone: String
+        aboutMe: String
+        gender: String
     }
     # Get User With ID
     extend type Query {
@@ -44,7 +45,7 @@ const userTypeDefs = gql`
     type Mutation {
         register(input: RegisterInput): User!
         login(input: LoginInput): User!
-        editProfile(input: EditUserInput): User!
+        editProfile(input: UserPersonalInput): User!
     }
 `;
 

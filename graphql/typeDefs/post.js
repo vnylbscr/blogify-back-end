@@ -5,17 +5,14 @@ const {
 } = require("apollo-server-express");
 const path = require("path");
 const Post = require("../../Models/post");
-const { loadSchemaSync } = require("@graphql-tools/load");
-const { GraphQLFileLoader } = require("@graphql-tools/graphql-file-loader");
-const { readFileSync } = require("fs");
 const { default: slugify } = require("slugify");
+const { TOKEN_NOT_FOUND } = require("../../lib/constants");
 
 const postTypeDefs = gql`
     type Post {
         _id: ID!
         title: String!
         content: String
-        author: Author
         comments: [Comment]
         category: [String]
         createdAt: String
@@ -28,7 +25,7 @@ const postTypeDefs = gql`
         cetegory: [String]
     }
     extend type Query {
-        getPost(id: ID!): Post!
+        getPost(_id: ID!): Post!
         getAllPosts: [Post!]
     }
     extend type Mutation {
@@ -39,19 +36,38 @@ const postTypeDefs = gql`
 const postResolvers = {
     Query: {
         getAllPosts: async (_, __, context, info) => {
-            if (!context.isAuth) {
-                throw new AuthenticationError("Token bulunamadı");
-            }
+            // if (!context.isAuth) {
+            //     throw new AuthenticationError(TOKEN_NOT_FOUND);
+            // }
             const posts = await Post.find();
             return posts;
+        },
+        getPost: async (parent, args, context, info) => {
+            if (context.isAuth) {
+                throw new AuthenticationError(TOKEN_NOT_FOUND);
+            }
+
+            const { _id } = args;
+
+            const foundPost = await Post.findOne({
+                _id,
+            });
+
+            if (!foundPost) {
+                throw new Error("Post not found.");
+            }
+
+            return {
+                ...foundPost._doc,
+            };
         },
     },
     Mutation: {
         addPost: async (parent, args, context, info) => {
             console.log(context);
-            // if (!context.isAuth) {
-            //     throw new AuthenticationError("Token not found.");
-            // }
+            if (!context.isAuth) {
+                throw new AuthenticationError(TOKEN_NOT_FOUND);
+            }
             const { userId, title, content, category } = args.input;
 
             if (!title || !content) {
