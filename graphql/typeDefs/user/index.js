@@ -1,9 +1,4 @@
-const userTypeDefs = require("./typeDefs");
-const userResolvers = require("./resolver");
+import userTypeDefs from './typeDefs.js';
+import userResolvers from './resolver.js';
 
-const userSchema = {
-    userTypeDefs,
-    userResolvers,
-};
-
-module.exports = userSchema;
+export { userTypeDefs, userResolvers };
