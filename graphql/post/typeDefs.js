@@ -11,19 +11,20 @@ const postTypeDefs = gql`
       createdAt: String
       slug: String
    }
+
    input PostInput {
       userId: ID!
       title: String!
       content: String!
       cetegory: [String]
-      image: String
+      image: Upload!
    }
    extend type Query {
       getPost(_id: ID!): Post!
       getAllPosts: [Post!]
    }
    extend type Mutation {
-      addPost(input: PostInput): Post!
+      addPost(data: PostInput): Post!
    }
 `;
 

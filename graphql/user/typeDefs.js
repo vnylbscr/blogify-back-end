@@ -43,7 +43,7 @@ const userTypeDefs = gql`
       githubUrl: String
    }
    # Get User With ID
-   extend type Query {
+   type Query {
       getUser(userID: ID!): User!
       getMeWithToken(token: String!): User!
    }

@@ -1,12 +1,13 @@
 import express from 'express';
 import { ApolloServer, gql } from 'apollo-server-express';
-import cors from 'cors';
+import { graphqlUploadExpress } from 'graphql-upload';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import { Auth } from './middleware/auth.js';
 import { UserTypeDefs, UserResolvers } from './graphql/user/index.js';
 import { PostTypeDefs, PostResolvers } from './graphql/post/index.js';
 import { CommentTypeDefs, CommentResolvers } from './graphql/comment/index.js';
+import cloudinary from 'cloudinary';
 
 dotenv.config();
 const PORT = process.env.PORT || 4000;
@@ -14,12 +15,11 @@ const PORT = process.env.PORT || 4000;
 async function startApolloServer() {
    // Construct a schema, using GraphQL schema language
    const typeDefs = gql`
-      type Query {
-         hello: String
-      }
-      type Book {
-         id: ID!
-         name: String!
+      scalar Upload
+      type File {
+         filename: String!
+         mimetype: String!
+         encoding: String!
       }
    `;
 
@@ -33,12 +33,16 @@ async function startApolloServer() {
    // mongo db bağırma abi
    mongoose.set('useCreateIndex', true);
 
+   cloudinary.v2.config({
+      cloud_name: process.env.CLOUD_NAME,
+      api_key: process.env.CLOUD_API_KEY,
+      api_secret: process.env.CLOUD_API_SECRET_KEY,
+   });
+
+   cloudinary.v2.uploader.upload_stream({})
+
    // Resolvers
-   const resolvers = {
-      Query: {
-         hello: () => 'Hello World!',
-      },
-   };
+   const resolvers = {};
 
    // Type Defs and Resolvers
    const server = new ApolloServer({
@@ -54,19 +58,8 @@ async function startApolloServer() {
    app.get('/', (req, res) => {
       res.redirect('/graphql');
    });
-   // Auth Middleware
-   app.use((req, res, next) => {
-      // const fullToken = req.headers.authorization;
-      // if (!fullToken) {
-      //     res.status(400).json({
-      //         message: "Token bulunamadı",
-      //     });
-      // } else {
-      //     next();
-      // }
-      console.log('Header Token', req.headers.authorization);
-      next();
-   });
+
+   app.use(graphqlUploadExpress());
    // Apply Middlaware
    server.applyMiddleware({ app });
    await new Promise((resolve) => app.listen({ port: PORT }, resolve));
