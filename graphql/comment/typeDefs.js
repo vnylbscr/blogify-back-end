@@ -1,4 +1,4 @@
-import { gql } from 'apollo-server-express';
+import { gql } from 'apollo-server-core';
 
 const commentTypeDefs = gql`
    type Comment {
@@ -12,6 +12,4 @@ const commentTypeDefs = gql`
    }
 `;
 
-const commentResolvers = {};
-
-export { commentTypeDefs, commentResolvers };
+export default commentTypeDefs;

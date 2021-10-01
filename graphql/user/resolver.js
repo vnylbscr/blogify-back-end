@@ -1,12 +1,12 @@
 import { gql, UserInputError, AuthenticationError } from 'apollo-server-express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { TOKEN_NOT_FOUND } from '../../../lib/constants.js';
+import { TOKEN_NOT_FOUND } from '../../lib/constants.js';
 import fs from 'node:fs';
-import User from '../../../Models/user.js';
-import { SO_SECRET_KEY } from '../../../utils/config.js';
-import { validateRegisterInputs } from '../../../utils/validateUser.js';
-import { validateLoginInputs } from '../../../utils/validateUser.js';
+import User from '../../Models/user.js';
+import { SO_SECRET_KEY } from '../../utils/config.js';
+import { validateRegisterInputs } from '../../utils/validateUser.js';
+import { validateLoginInputs } from '../../utils/validateUser.js';
 
 const userResolvers = {
    Query: {

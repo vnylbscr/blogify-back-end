@@ -1,37 +1,9 @@
 import { gql, AuthenticationError, UserInputError } from 'apollo-server-express';
-import path from 'path';
 import Post from '../../Models/post.js';
 import slugify from 'slugify';
 import { TOKEN_NOT_FOUND } from '../../lib/constants.js';
 import cloudinary from 'cloudinary';
 import { v4 as uuidv4, v4 } from 'uuid';
-
-const postTypeDefs = gql`
-   type Post {
-      _id: ID!
-      title: String!
-      content: String
-      image: String
-      comments: [Comment]
-      category: [String]
-      createdAt: String
-      slug: String
-   }
-   input PostInput {
-      userId: ID!
-      title: String!
-      content: String!
-      cetegory: [String]
-      image: String
-   }
-   extend type Query {
-      getPost(_id: ID!): Post!
-      getAllPosts: [Post!]
-   }
-   extend type Mutation {
-      addPost(input: PostInput): Post!
-   }
-`;
 
 const postResolvers = {
    Query: {
@@ -106,4 +78,4 @@ const postResolvers = {
    },
 };
 
-export { postTypeDefs, postResolvers };
+export default postResolvers;

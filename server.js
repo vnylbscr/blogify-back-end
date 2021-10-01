@@ -3,10 +3,10 @@ import { ApolloServer, gql } from 'apollo-server-express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-import { userResolvers, userTypeDefs } from './graphql/typeDefs/user/index.js';
-import { postTypeDefs, postResolvers } from './graphql/typeDefs/post.js';
-import { commentTypeDefs, commentResolvers } from './graphql/typeDefs/comment.js';
 import { Auth } from './middleware/auth.js';
+import { UserTypeDefs, UserResolvers } from './graphql/user/index.js';
+import { PostTypeDefs, PostResolvers } from './graphql/post/index.js';
+import { CommentTypeDefs, CommentResolvers } from './graphql/comment/index.js';
 
 dotenv.config();
 const PORT = process.env.PORT || 4000;
@@ -42,8 +42,8 @@ async function startApolloServer() {
 
    // Type Defs and Resolvers
    const server = new ApolloServer({
-      typeDefs: [typeDefs, userTypeDefs, postTypeDefs, commentTypeDefs],
-      resolvers: [resolvers, userResolvers, postResolvers, commentResolvers],
+      typeDefs: [typeDefs, UserTypeDefs, PostTypeDefs, CommentTypeDefs],
+      resolvers: [resolvers, UserResolvers, PostResolvers, CommentResolvers],
       context: Auth,
    });
 
