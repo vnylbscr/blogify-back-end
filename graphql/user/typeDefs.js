@@ -29,7 +29,9 @@ const userTypeDefs = gql`
       email: String!
       password: String!
    }
+
    input UserPersonalInput {
+      userId: ID!
       username: String
       job: String
       school: String

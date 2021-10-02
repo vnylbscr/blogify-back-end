@@ -1,12 +1,10 @@
-import { gql, UserInputError, AuthenticationError } from 'apollo-server-express';
+import { UserInputError, AuthenticationError } from 'apollo-server-express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { TOKEN_NOT_FOUND } from '../../lib/constants.js';
-import fs from 'node:fs';
 import User from '../../Models/user.js';
 import { SO_SECRET_KEY } from '../../utils/config.js';
 import { validateRegisterInputs } from '../../utils/validateUser.js';
-import { validateLoginInputs } from '../../utils/validateUser.js';
 
 const userResolvers = {
    Query: {
@@ -14,15 +12,13 @@ const userResolvers = {
          try {
             const { token } = args;
             if (!token) {
-               return;
+               throw new AuthenticationError(TOKEN_NOT_FOUND);
             }
             const user = jwt.verify(token, SO_SECRET_KEY);
 
             const res = await User.findOne({ email: user.email });
             return {
-               id: res._id,
-               name: res.username,
-               ...res._doc,
+               ...res.toObject(),
             };
          } catch (error) {
             throw new AuthenticationError('Token geçersiz yada süresi dolmuş');
@@ -68,11 +64,13 @@ const userResolvers = {
                   username: res.username,
                },
                SO_SECRET_KEY,
-               { expiresIn: '4d' }
+               {
+                  expiresIn: '4d',
+               }
             );
             return {
                token: authToken,
-               ...res._doc,
+               ...res.toObject(),
             };
          }
       },
@@ -104,14 +102,20 @@ const userResolvers = {
             };
          }
       },
-      editProfile: async (_, args, context, __) => {
+      editProfile: async (_, { data }, context) => {
          if (!context.isAuth) {
             throw new AuthenticationError(TOKEN_NOT_FOUND);
          }
 
-         const doc = await User.findOneAndUpdate({
-            ...args,
-         });
+         const doc = await User.findOneAndUpdate(
+            {
+               _id: data.userId,
+            },
+            { ...data },
+            { new: true }
+         );
+
+         return doc;
       },
    },
 };

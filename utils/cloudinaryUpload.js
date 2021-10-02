@@ -1,28 +1,20 @@
 import cloudinary from 'cloudinary';
-import streamifier from 'streamifier';
 
-export const uploadFileCloudinary = async (file, folder) => {
-   const { stream, filename, mimetype, encoding } = await file;
-   const fileBuffer = Buffer.from(file);
-   let uploadFromBuffer = () => {
-      return new Promise((resolve, reject) => {
-         let cld_upload_stream = cloudinary.v2.uploader.upload_stream(
-            {
-               folder,
-            },
-            (error, result) => {
-               if (result) {
-                  resolve(result);
-               } else {
-                  reject(error);
-               }
+const uploadFileCloudinary = async (file, folder = 'blogify_media') => {
+   const { createReadStream } = file;
+   const res = await new Promise((resolve, reject) => {
+      createReadStream().pipe(
+         cloudinary.v2.uploader.upload_stream({ folder, unique_filename: true }, (error, result) => {
+            if (error) {
+               reject(error.message);
             }
-         );
 
-         streamifier.createReadStream(fileBuffer).pipe(cld_upload_stream);
-      });
-   };
+            resolve(result.url);
+         })
+      );
+   });
 
-   const result = await uploadFromBuffer();
-   return result;
+   return res;
 };
+
+export default uploadFileCloudinary;
