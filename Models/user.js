@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
-const Schema = mongoose.Schema;
+
+const { Schema } = mongoose;
 const userSchema = new Schema(
    {
       username: {
@@ -11,7 +12,12 @@ const userSchema = new Schema(
          defaultValue: null,
          unique: true,
       },
-      posts: [Schema.Types.Mixed],
+      posts: [
+         {
+            type: Schema.Types.Mixed,
+            ref: 'Post',
+         },
+      ],
       password: { type: String, required: true },
       twitterUrl: {
          type: String,
@@ -54,6 +60,6 @@ const userSchema = new Schema(
    { timestamps: true }
 );
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model('User', userSchema, 'Users');
 
 export default User;

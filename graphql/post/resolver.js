@@ -3,6 +3,7 @@ import slugify from 'slugify';
 import Post from '../../Models/post.js';
 import { TOKEN_NOT_FOUND } from '../../lib/constants.js';
 import uploadFileCloudinary from '../../utils/cloudinaryUpload.js';
+import User from '../../Models/user.js';
 
 const postResolvers = {
    Query: {
@@ -17,7 +18,10 @@ const postResolvers = {
          if (!isAuth) {
             throw new AuthenticationError(TOKEN_NOT_FOUND);
          }
-         const posts = await Post.find();
+
+         const posts = await Post.find({}).populate('user');
+
+         console.log('merto', posts);
          return posts;
       },
 
@@ -26,13 +30,19 @@ const postResolvers = {
             isAuth: { isAuth },
             client,
          } = context;
-         if (isAuth) {
+         if (!isAuth) {
             throw new AuthenticationError(TOKEN_NOT_FOUND);
+         }
+
+         const foundUser = await User.findById(user);
+
+         if (!foundUser) {
+            throw new Error('User not found.');
          }
 
          const posts = await Post.find({
             user,
-         });
+         }).populate('user');
 
          return posts;
       },
@@ -42,15 +52,17 @@ const postResolvers = {
             isAuth: { isAuth },
             client,
          } = context;
-         if (isAuth) {
+         if (!isAuth) {
             throw new AuthenticationError(TOKEN_NOT_FOUND);
          }
 
          const { _id } = args;
 
-         const foundPost = await Post.findOne({
-            _id,
-         });
+         const foundPost = await (
+            await Post.findOne({
+               _id,
+            })
+         ).populate('user');
 
          if (!foundPost) {
             throw new Error('Post not found.');
@@ -67,19 +79,24 @@ const postResolvers = {
                client,
             } = context;
 
-            if (isAuth) {
+            if (!isAuth) {
                throw new AuthenticationError(TOKEN_NOT_FOUND);
             }
             const { userId, title, subtitle, image, content, category } = args.data;
 
-            if (!title || !content || !image || subtitle) {
+            if (!title || !content || !image || !subtitle || !userId) {
                throw new UserInputError('please fill required fields.');
             }
+
+            const user = await User.findById(userId);
+
+            if (!user) {
+               throw new Error('user not found!');
+            }
+
             const { file } = await image;
 
             const imageUrl = await uploadFileCloudinary(file);
-
-            console.log('image url is', imageUrl);
 
             const newPost = new Post({
                user: userId,
@@ -87,16 +104,16 @@ const postResolvers = {
                subtitle,
                content,
                category,
-               image: Image,
+               image: imageUrl,
                slug: slugify(title),
             });
 
-            const post = await newPost.save();
+            const post = await (await newPost.save()).populate('user');
 
             return post;
          } catch (error) {
             console.log(error);
-            throw new Error('Ulaaa');
+            throw new Error(error.message);
          }
       },
    },

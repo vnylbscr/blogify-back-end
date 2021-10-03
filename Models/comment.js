@@ -1,16 +1,17 @@
 import mongoose from 'mongoose';
-const Schema = mongoose.Schema;
+
+const { Schema } = mongoose;
 
 const commentSchema = new Schema(
    {
       content: { type: String, defaultValue: null },
       postId: {
          type: Schema.Types.ObjectId,
-         ref: 'posts',
+         ref: 'Post',
       },
       userId: {
          type: Schema.Types.ObjectId,
-         ref: 'users',
+         ref: 'User',
       },
       likedCount: {
          type: Number,
@@ -20,6 +21,6 @@ const commentSchema = new Schema(
    { timestamps: true }
 );
 
-const Comment = mongoose.model('Comment', commentSchema);
+const Comment = mongoose.model('Comment', commentSchema, 'Comment');
 
 export default Comment;

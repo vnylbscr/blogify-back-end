@@ -4,8 +4,6 @@ import { SO_SECRET_KEY } from '../utils/config.js';
 
 // @eslint-ignore
 const Auth = (request) => {
-   console.log('header', request.headers);
-
    const header = request.headers.authorization;
    if (!header) {
       return {
@@ -20,7 +18,6 @@ const Auth = (request) => {
    }
    try {
       const user = jwt.verify(token, SO_SECRET_KEY);
-      console.log('agaa', user);
       return {
          user,
          isAuth: true,

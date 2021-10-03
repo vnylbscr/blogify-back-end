@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import cloudinary from 'cloudinary';
 import redis from 'redis';
+import Bluebird from 'bluebird';
 import Auth from './middleware/auth.js';
 import { UserTypeDefs, UserResolvers } from './graphql/user/index.js';
 import { PostTypeDefs, PostResolvers } from './graphql/post/index.js';
@@ -13,10 +14,10 @@ import { CommentTypeDefs, CommentResolvers } from './graphql/comment/index.js';
 dotenv.config();
 const PORT = process.env.PORT || 4000;
 
-const client = redis.createClient();
+Bluebird.promisifyAll(redis.RedisClient.prototype);
+Bluebird.promisifyAll(redis.Multi.prototype);
 
 async function startApolloServer() {
-   // Construct a schema, using GraphQL schema language
    const typeDefs = gql`
       scalar Upload
       type File {
@@ -25,6 +26,8 @@ async function startApolloServer() {
          encoding: String!
       }
    `;
+   const client = redis.createClient(6379);
+
    // redis
    client.on('error', (error) => {
       console.log(error);
@@ -73,7 +76,7 @@ async function startApolloServer() {
    app.use(
       graphqlUploadExpress({
          maxFiles: 4, // 4 file
-         maxFileSize: 10000, // 10 MB
+         maxFileSize: 100000000, // 10 MB
       })
    );
    // Apply Middlaware

@@ -16,12 +16,12 @@ const postSchema = new Schema(
       content: String,
       comments: {
          type: Schema.Types.ObjectId,
-         ref: 'comments',
+         ref: 'Comment',
       },
       category: Schema.Types.Mixed,
       user: {
          type: Schema.Types.ObjectId,
-         ref: 'users',
+         ref: 'User',
       },
       slug: {
          type: String,
@@ -31,6 +31,6 @@ const postSchema = new Schema(
    { timestamps: true }
 );
 
-const Post = mongoose.model('Post', postSchema);
+const Post = mongoose.model('Post', postSchema, 'Post');
 
 export default Post;
