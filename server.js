@@ -3,14 +3,17 @@ import { ApolloServer, gql } from 'apollo-server-express';
 import { graphqlUploadExpress } from 'graphql-upload';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-import { Auth } from './middleware/auth.js';
+import cloudinary from 'cloudinary';
+import redis from 'redis';
+import Auth from './middleware/auth.js';
 import { UserTypeDefs, UserResolvers } from './graphql/user/index.js';
 import { PostTypeDefs, PostResolvers } from './graphql/post/index.js';
 import { CommentTypeDefs, CommentResolvers } from './graphql/comment/index.js';
-import cloudinary from 'cloudinary';
 
 dotenv.config();
 const PORT = process.env.PORT || 4000;
+
+const client = redis.createClient();
 
 async function startApolloServer() {
    // Construct a schema, using GraphQL schema language
@@ -22,7 +25,11 @@ async function startApolloServer() {
          encoding: String!
       }
    `;
-
+   // redis
+   client.on('error', (error) => {
+      console.log(error);
+   });
+   // mongo
    mongoose
       .connect(process.env.DB_URL, {
          useUnifiedTopology: true,
@@ -39,8 +46,6 @@ async function startApolloServer() {
       api_secret: process.env.CLOUD_API_SECRET_KEY,
    });
 
-   cloudinary.v2.uploader.upload_stream({})
-
    // Resolvers
    const resolvers = {};
 
@@ -48,7 +53,13 @@ async function startApolloServer() {
    const server = new ApolloServer({
       typeDefs: [typeDefs, UserTypeDefs, PostTypeDefs, CommentTypeDefs],
       resolvers: [resolvers, UserResolvers, PostResolvers, CommentResolvers],
-      context: Auth,
+      context: ({ req }) => {
+         const isAuth = Auth(req);
+         return {
+            isAuth,
+            client,
+         };
+      },
    });
 
    // Server Start
@@ -59,7 +70,12 @@ async function startApolloServer() {
       res.redirect('/graphql');
    });
 
-   app.use(graphqlUploadExpress());
+   app.use(
+      graphqlUploadExpress({
+         maxFiles: 4, // 4 file
+         maxFileSize: 10000, // 10 MB
+      })
+   );
    // Apply Middlaware
    server.applyMiddleware({ app });
    await new Promise((resolve) => app.listen({ port: PORT }, resolve));

@@ -6,15 +6,43 @@ import uploadFileCloudinary from '../../utils/cloudinaryUpload.js';
 
 const postResolvers = {
    Query: {
-      getAllPosts: async (_, __, context, info) => {
-         if (!context.isauth) {
+      getAllPosts: async (_, args, context) => {
+         const {
+            isAuth: { isAuth },
+            client,
+         } = context;
+
+         console.log('is auht', isAuth);
+
+         if (!isAuth) {
             throw new AuthenticationError(TOKEN_NOT_FOUND);
          }
          const posts = await Post.find();
          return posts;
       },
-      getPost: async (parent, args, context, info) => {
-         if (context.isAuth) {
+
+      getUserPosts: async (_, { user }, context) => {
+         const {
+            isAuth: { isAuth },
+            client,
+         } = context;
+         if (isAuth) {
+            throw new AuthenticationError(TOKEN_NOT_FOUND);
+         }
+
+         const posts = await Post.find({
+            user,
+         });
+
+         return posts;
+      },
+
+      getPost: async (parent, args, context) => {
+         const {
+            isAuth: { isAuth },
+            client,
+         } = context;
+         if (isAuth) {
             throw new AuthenticationError(TOKEN_NOT_FOUND);
          }
 
@@ -32,9 +60,14 @@ const postResolvers = {
       },
    },
    Mutation: {
-      addPost: async (parent, args, context, info) => {
+      addPost: async (parent, args, context) => {
          try {
-            if (!context.isAuth) {
+            const {
+               isAuth: { isAuth },
+               client,
+            } = context;
+
+            if (isAuth) {
                throw new AuthenticationError(TOKEN_NOT_FOUND);
             }
             const { userId, title, subtitle, image, content, category } = args.data;

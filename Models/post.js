@@ -1,5 +1,7 @@
 import mongoose from 'mongoose';
-const Schema = mongoose.Schema;
+
+const { Schema } = mongoose;
+
 const postSchema = new Schema(
    {
       title: { type: String, defaultValue: null },

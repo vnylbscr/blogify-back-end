@@ -8,12 +8,18 @@ import { validateRegisterInputs } from '../../utils/validateUser.js';
 
 const userResolvers = {
    Query: {
-      getMeWithToken: async (parent, args, context, _) => {
+      getMeWithToken: async (parent, args, context) => {
          try {
+            const {
+               isAuth: { isAuth },
+               client,
+            } = context;
             const { token } = args;
+
             if (!token) {
                throw new AuthenticationError(TOKEN_NOT_FOUND);
             }
+
             const user = jwt.verify(token, SO_SECRET_KEY);
 
             const res = await User.findOne({ email: user.email });
@@ -27,27 +33,31 @@ const userResolvers = {
    },
    Mutation: {
       // REGISTER USER
-      register: async (parent, args, context, info) => {
-         console.log(args);
-         const { username, email, password } = args.input;
+      register: async (parent, args, context) => {
+         try {
+            const {
+               isAuth: { isAuth },
+               client,
+            } = context;
+            const { username, email, password } = args.input;
 
-         console.log(username);
-         // Validate the user
-         const { errors, isValid } = validateRegisterInputs(username, email, password);
+            console.log(username);
+            // Validate the user
+            const { errors, isValid } = validateRegisterInputs(username, email, password);
 
-         if (!isValid) {
-            throw new UserInputError('Errors', { errors });
-         }
-         // todo check user is exist
-         const user = await User.findOne({ email });
-         console.log('user', user);
-         if (user) {
-            throw new UserInputError('Bu e-mail ile kayıtlı bir kullanıcı zaten var.', {
-               errors: {
-                  email: 'Bu isimde bir e-mail var',
-               },
-            });
-         } else {
+            if (!isValid) {
+               throw new UserInputError('Errors', { errors });
+            }
+            // check user is exist
+            const user = await User.findOne({ email });
+
+            if (user) {
+               throw new UserInputError('Bu e-mail ile kayıtlı bir kullanıcı zaten var.', {
+                  errors: {
+                     email: 'Bu isimde bir e-mail var',
+                  },
+               });
+            }
             // hash password and save user to db
             const hashPassword = await bcrypt.hash(password, 10);
             const newUser = new User({
@@ -72,10 +82,18 @@ const userResolvers = {
                token: authToken,
                ...res.toObject(),
             };
+         } catch (error) {
+            throw new Error(error.message);
          }
       },
       // LOGIN USER
-      login: async (parent, args, context, info) => {
+      login: async (parent, args, context) => {
+         const {
+            isAuth: { isAuth },
+            client,
+         } = context;
+         // const { isAuth, client } = context;
+         console.log('ömerto', context);
          const { email, password } = args.input;
          const user = await User.findOne({ email });
          if (!user) {
@@ -103,7 +121,14 @@ const userResolvers = {
          }
       },
       editProfile: async (_, { data }, context) => {
-         if (!context.isAuth) {
+         const {
+            isAuth: { isAuth },
+            client,
+         } = context;
+
+         // const { isAuth, client } = context;
+
+         if (isAuth) {
             throw new AuthenticationError(TOKEN_NOT_FOUND);
          }
 
