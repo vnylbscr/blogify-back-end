@@ -19,7 +19,9 @@ const postResolvers = {
             throw new AuthenticationError(TOKEN_NOT_FOUND);
          }
 
-         const posts = await Post.find({}).populate('user');
+         const posts = await Post.find({})
+            .sort({ createdAt: -1 })
+            .populate('user');
 
          return posts;
       },
@@ -82,7 +84,8 @@ const postResolvers = {
                throw new AuthenticationError(TOKEN_NOT_FOUND);
             }
 
-            const { userId, title, subtitle, image, content, category } = args.data;
+            const { userId, title, subtitle, image, content, category } =
+               args.data;
 
             if (!title || !content || !image || !subtitle || !userId) {
                throw new UserInputError('please fill required fields.');

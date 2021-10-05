@@ -24,6 +24,7 @@ const postTypeDefs = gql`
    }
    type Query {
       getAllPosts: [Post]
+      getAllPostsByPage(page: Int, limit: Int): PostPagination!
       getUserPosts(user: ID!): [Post]
       getPost(_id: ID!): Post!
    }
@@ -35,6 +36,11 @@ const postTypeDefs = gql`
       createdPost(data: SubscriptionInput): Post
       updatedPost(data: SubscriptionInput): Post
       deletedPost(data: SubscriptionInput): Post
+   }
+
+   type PostPagination {
+      posts: [Post]
+      paginator: Paginator
    }
 
    input SubscriptionInput {
