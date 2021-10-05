@@ -1,15 +1,21 @@
 import express from 'express';
-import { ApolloServer, gql } from 'apollo-server-express';
+import { ApolloServer } from 'apollo-server-express';
 import { graphqlUploadExpress } from 'graphql-upload';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import cloudinary from 'cloudinary';
 import redis from 'redis';
 import Bluebird from 'bluebird';
+import { makeExecutableSchema } from '@graphql-tools/schema';
+import { createServer } from 'http';
+import { execute, subscribe } from 'graphql';
+import { SubscriptionServer } from 'subscriptions-transport-ws';
+import { PubSub } from 'graphql-subscriptions';
 import Auth from './middleware/auth.js';
 import { UserTypeDefs, UserResolvers } from './graphql/user/index.js';
 import { PostTypeDefs, PostResolvers } from './graphql/post/index.js';
 import { CommentTypeDefs, CommentResolvers } from './graphql/comment/index.js';
+import fileTypeDefs from './graphql/file/typeDefs.js';
 
 dotenv.config();
 const PORT = process.env.PORT || 4000;
@@ -17,17 +23,31 @@ const PORT = process.env.PORT || 4000;
 Bluebird.promisifyAll(redis.RedisClient.prototype);
 Bluebird.promisifyAll(redis.Multi.prototype);
 
-async function startApolloServer() {
-   const typeDefs = gql`
-      scalar Upload
-      type File {
-         filename: String!
-         mimetype: String!
-         encoding: String!
-      }
-   `;
-   const client = redis.createClient(6379);
+const typeDefs = [UserTypeDefs, PostTypeDefs, CommentTypeDefs, fileTypeDefs];
+const resolvers = [UserResolvers, PostResolvers, CommentResolvers];
 
+const schema = makeExecutableSchema({
+   typeDefs,
+   resolvers,
+});
+
+async function startApolloServer() {
+   const client = redis.createClient(6379);
+   const pubsub = new PubSub();
+
+   const app = express();
+   const httpServer = createServer(app);
+
+   app.get('/', (req, res) => {
+      res.redirect('/graphql');
+   });
+
+   app.use(
+      graphqlUploadExpress({
+         maxFiles: 4, // 4 file
+         maxFileSize: 100000000, // 10 MB
+      })
+   );
    // redis
    client.on('error', (error) => {
       console.log(error);
@@ -49,36 +69,49 @@ async function startApolloServer() {
       api_secret: process.env.CLOUD_API_SECRET_KEY,
    });
 
-   // Resolvers
-   const resolvers = {};
-
    // Type Defs and Resolvers
    const server = new ApolloServer({
-      typeDefs: [typeDefs, UserTypeDefs, PostTypeDefs, CommentTypeDefs],
-      resolvers: [resolvers, UserResolvers, PostResolvers, CommentResolvers],
+      schema,
+      plugins: [
+         {
+            async serverWillStart() {
+               return {
+                  async drainServer() {
+                     subscriptionServer.close(); //eslint-disable-line
+                  },
+               };
+            },
+         },
+      ],
       context: ({ req }) => {
          const isAuth = Auth(req);
          return {
             isAuth,
             client,
+            pubsub,
          };
       },
    });
 
+   const subscriptionServer = SubscriptionServer.create(
+      {
+         // This is the `schema` we just created.
+         schema,
+         // These are imported from `graphql`.
+         execute,
+         subscribe,
+      },
+      {
+         // This is the `httpServer` we created in a previous step.
+         server: httpServer,
+         // This `server` is the instance returned from `new ApolloServer`.
+         path: server.graphqlPath,
+      }
+   );
+
    // Server Start
    await server.start();
-   const app = express();
 
-   app.get('/', (req, res) => {
-      res.redirect('/graphql');
-   });
-
-   app.use(
-      graphqlUploadExpress({
-         maxFiles: 4, // 4 file
-         maxFileSize: 100000000, // 10 MB
-      })
-   );
    // Apply Middlaware
    server.applyMiddleware({ app });
    await new Promise((resolve) => app.listen({ port: PORT }, resolve));

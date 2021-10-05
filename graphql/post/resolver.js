@@ -21,7 +21,6 @@ const postResolvers = {
 
          const posts = await Post.find({}).populate('user');
 
-         console.log('merto', posts);
          return posts;
       },
 
@@ -82,6 +81,7 @@ const postResolvers = {
             if (!isAuth) {
                throw new AuthenticationError(TOKEN_NOT_FOUND);
             }
+
             const { userId, title, subtitle, image, content, category } = args.data;
 
             if (!title || !content || !image || !subtitle || !userId) {

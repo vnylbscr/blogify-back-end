@@ -22,13 +22,23 @@ const postTypeDefs = gql`
       category: [String]
       image: Upload!
    }
-   extend type Query {
+   type Query {
       getAllPosts: [Post]
       getUserPosts(user: ID!): [Post]
       getPost(_id: ID!): Post!
    }
-   extend type Mutation {
+   type Mutation {
       addPost(data: PostInput): Post!
+   }
+
+   type Subscription {
+      createdPost(data: SubscriptionInput): Post
+      updatedPost(data: SubscriptionInput): Post
+      deletedPost(data: SubscriptionInput): Post
+   }
+
+   input SubscriptionInput {
+      token: String!
    }
 `;
 

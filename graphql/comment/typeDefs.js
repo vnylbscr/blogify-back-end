@@ -7,7 +7,7 @@ const commentTypeDefs = gql`
       likedCount: Int
       createdAt: String
    }
-   extend type Query {
+   type Query {
       getComments(postId: ID!): [Comment]
    }
 `;
