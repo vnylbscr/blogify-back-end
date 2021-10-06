@@ -12,6 +12,9 @@ const postTypeDefs = gql`
       createdAt: String
       slug: String
       user: User
+      likedCount: Int
+      commentCount: Int
+      likedUsers: [User]
    }
 
    input PostInput {
@@ -28,19 +31,30 @@ const postTypeDefs = gql`
       getUserPosts(user: ID!): [Post]
       getPost(_id: ID!): Post!
    }
+
    type Mutation {
       addPost(data: PostInput): Post!
    }
 
    type Subscription {
-      createdPost(data: SubscriptionInput): Post
-      updatedPost(data: SubscriptionInput): Post
-      deletedPost(data: SubscriptionInput): Post
+      createdPost(data: SubscriptionInput!): Post
+      updatedPost(data: SubscriptionInput!): Post
+      deletedPost(data: SubscriptionInput!): Post
    }
 
    type PostPagination {
       posts: [Post]
       paginator: Paginator
+   }
+
+   type Paginator {
+      data: [Post]
+      totalDocsCount: Int
+      limit: Int
+      hasPrevPage: Boolean
+      hasNextPage: Boolean
+      pageNumber: Int
+      currentPage: Int
    }
 
    input SubscriptionInput {

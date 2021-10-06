@@ -64,7 +64,6 @@ const userResolvers = {
                username,
                email,
                password: hashPassword,
-               createdAt: new Date(),
             });
             const res = await newUser.save();
             const authToken = jwt.sign(
@@ -124,9 +123,8 @@ const userResolvers = {
          const {
             isAuth: { isAuth },
             client,
+            pubsub,
          } = context;
-
-         // const { isAuth, client } = context;
 
          if (isAuth) {
             throw new AuthenticationError(TOKEN_NOT_FOUND);

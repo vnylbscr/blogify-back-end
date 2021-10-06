@@ -1,6 +1,8 @@
 import { gql } from 'apollo-server-express';
 
 const userTypeDefs = gql`
+   scalar Date
+
    type User {
       _id: ID!
       username: String
@@ -18,6 +20,9 @@ const userTypeDefs = gql`
       twitterUrl: String
       githubUrl: String
       createdAt: String
+      birthDay: Date
+      interests: [String]
+      location: Location
    }
 
    input RegisterInput {
@@ -43,12 +48,25 @@ const userTypeDefs = gql`
       instagramUrl: String
       twitterUrl: String
       githubUrl: String
+      location: LocationInput
    }
+
+   type Location {
+      country: String
+      city: String
+   }
+
+   input LocationInput {
+      country: String
+      city: String
+   }
+
    # Get User With ID
    type Query {
       getUser(userID: ID!): User!
       getMeWithToken(token: String!): User!
    }
+
    # Mutations For User Auth
    type Mutation {
       register(input: RegisterInput): User!

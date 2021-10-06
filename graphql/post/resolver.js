@@ -11,17 +11,14 @@ const postResolvers = {
          const {
             isAuth: { isAuth },
             client,
+            pubsub,
          } = context;
-
-         console.log('is auht', isAuth);
 
          if (!isAuth) {
             throw new AuthenticationError(TOKEN_NOT_FOUND);
          }
 
-         const posts = await Post.find({})
-            .sort({ createdAt: -1 })
-            .populate('user');
+         const posts = await Post.find({}).sort({ createdAt: -1 }).populate('user');
 
          return posts;
       },
@@ -31,6 +28,7 @@ const postResolvers = {
             isAuth: { isAuth },
             client,
          } = context;
+
          if (!isAuth) {
             throw new AuthenticationError(TOKEN_NOT_FOUND);
          }
@@ -84,8 +82,7 @@ const postResolvers = {
                throw new AuthenticationError(TOKEN_NOT_FOUND);
             }
 
-            const { userId, title, subtitle, image, content, category } =
-               args.data;
+            const { userId, title, subtitle, image, content, category } = args.data;
 
             if (!title || !content || !image || !subtitle || !userId) {
                throw new UserInputError('please fill required fields.');

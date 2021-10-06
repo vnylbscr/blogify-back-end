@@ -7,6 +7,24 @@ const userSchema = new Schema(
          type: String,
          unique: true,
       },
+      birthDay: {
+         type: Date,
+         defaultValue: null,
+      },
+      interests: {
+         type: Schema.Types.Mixed,
+         defaultValue: null,
+      },
+      location: {
+         country: {
+            type: String,
+            defaultValue: null,
+         },
+         city: {
+            type: String,
+            defaultValue: null,
+         },
+      },
       email: {
          type: String,
          defaultValue: null,
@@ -14,7 +32,7 @@ const userSchema = new Schema(
       },
       posts: [
          {
-            type: Schema.Types.Mixed,
+            type: Schema.Types.ObjectId,
             ref: 'Post',
          },
       ],

@@ -18,7 +18,7 @@ const postSchema = new Schema(
          type: Schema.Types.ObjectId,
          ref: 'Comment',
       },
-      category: Schema.Types.Mixed,
+      category: [String],
       user: {
          type: Schema.Types.ObjectId,
          ref: 'User',
@@ -27,6 +27,20 @@ const postSchema = new Schema(
          type: String,
          defaultValue: null,
       },
+      commentCount: {
+         type: Number,
+         defaultValue: null,
+      },
+      likedCount: {
+         type: Number,
+         defaultValue: null,
+      },
+      likedUsers: [
+         {
+            type: Schema.Types.ObjectId,
+            ref: 'User',
+         },
+      ],
    },
    { timestamps: true }
 );
