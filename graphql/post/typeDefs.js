@@ -25,6 +25,15 @@ const postTypeDefs = gql`
       category: [String]
       image: Upload!
    }
+
+   input UpdatePostInput {
+      _id: ID!
+      title: String
+      subtitle: String
+      content: String
+      category: [String]
+      image: Upload
+   }
    type Query {
       getAllPosts: [Post]
       getAllPostsByPage(page: Int, limit: Int): PostPagination!
@@ -34,6 +43,8 @@ const postTypeDefs = gql`
 
    type Mutation {
       addPost(data: PostInput): Post!
+      updatePost(data: UpdatePostInput): Post!
+      deletePost(postId: ID!): Post!
    }
 
    type Subscription {

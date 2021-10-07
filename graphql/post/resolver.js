@@ -1,22 +1,24 @@
 import { AuthenticationError, UserInputError } from 'apollo-server-express';
 import slugify from 'slugify';
+import { PubSub } from 'graphql-subscriptions';
 import Post from '../../Models/post.js';
 import { TOKEN_NOT_FOUND } from '../../lib/constants.js';
 import uploadFileCloudinary from '../../utils/cloudinaryUpload.js';
 import User from '../../Models/user.js';
 
+const pubsub = new PubSub();
 const postResolvers = {
    Query: {
       getAllPosts: async (_, args, context) => {
          const {
             isAuth: { isAuth },
             client,
-            pubsub,
+            // pubsub,
          } = context;
-
-         if (!isAuth) {
-            throw new AuthenticationError(TOKEN_NOT_FOUND);
-         }
+         console.log('aga bu nbe', pubsub);
+         // if (!isAuth) {
+         //    throw new AuthenticationError(TOKEN_NOT_FOUND);
+         // }
 
          const posts = await Post.find({}).sort({ createdAt: -1 }).populate('user');
 
@@ -76,6 +78,7 @@ const postResolvers = {
             const {
                isAuth: { isAuth },
                client,
+               // pubsub,
             } = context;
 
             if (!isAuth) {
@@ -110,11 +113,92 @@ const postResolvers = {
 
             const post = await (await newPost.save()).populate('user');
 
+            pubsub.publish('createdPost', {
+               createdPost: post,
+            });
+
             return post;
          } catch (error) {
             console.log(error);
             throw new Error(error.message);
          }
+      },
+      updatePost: async (info, { data }, context) => {
+         const {
+            isAuth: { isAuth },
+            client,
+            // pubsub,
+         } = context;
+
+         const { image } = data;
+
+         if (!isAuth) {
+            throw new AuthenticationError(TOKEN_NOT_FOUND);
+         }
+
+         const foundPost = await Post.findById(data._id);
+
+         if (!foundPost) {
+            throw new Error('post not exists.');
+         }
+
+         let imageUrl = foundPost.image;
+
+         if (image.file) {
+            const { file } = image;
+            const res = await uploadFileCloudinary(file);
+            imageUrl = res;
+         }
+
+         const updatedPost = await Post.findByIdAndUpdate(data._id, { image: imageUrl, ...data }, { new: true });
+
+         pubsub.publish('updatedPost', {
+            updatedPost,
+         });
+
+         return updatedPost;
+      },
+      deletePost: async (info, { data }, context) => {
+         const {
+            isAuth: { isAuth },
+            client,
+            // pubsub,
+         } = context;
+
+         if (!isAuth) {
+            throw new AuthenticationError(TOKEN_NOT_FOUND);
+         }
+
+         const { _id, title, subtitle, image, content, category } = data;
+
+         if (!_id || !title || !subtitle || !image || !category || !content) {
+            throw new UserInputError('please fill required fields.');
+         }
+
+         const foundPost = await Post.findById(_id);
+
+         if (!foundPost) {
+            throw new Error('post not exists.');
+         }
+
+         const deletedPost = await Post.findByIdAndDelete(_id);
+
+         pubsub.publish('deletedPost', {
+            deletedPost,
+         });
+
+         return deletedPost;
+      },
+   },
+   Subscription: {
+      createdPost: {
+         subscribe: (info, { token }, context) => pubsub.asyncIterator(['createdPost']),
+      },
+      updatedPost: {
+         subscribe: (info, { token }, context) => pubsub.asyncIterator(['updatedPost']),
+      },
+      deletedPost: {
+         subscribe: (info, { token }, context) => pubsub.asyncIterator(['deletedPost']),
       },
    },
 };

@@ -1,5 +1,5 @@
 import express from 'express';
-import { ApolloServer } from 'apollo-server-express';
+import { ApolloServer, gql } from 'apollo-server-express';
 import { graphqlUploadExpress } from 'graphql-upload';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
@@ -19,13 +19,13 @@ const PORT = process.env.PORT || 4000;
 Bluebird.promisifyAll(redis.RedisClient.prototype);
 Bluebird.promisifyAll(redis.Multi.prototype);
 
-async function startApolloServer() {
-   const client = redis.createClient(6379);
+const client = redis.createClient(6379);
+(async () => {
    const pubsub = new PubSub();
-
    const app = express();
    const httpServer = createServer(app);
 
+   // Resolver map
    app.get('/', (req, res) => {
       res.redirect('/graphql');
    });
@@ -57,20 +57,8 @@ async function startApolloServer() {
       api_secret: process.env.CLOUD_API_SECRET_KEY,
    });
 
-   // Type Defs and Resolvers
    const server = new ApolloServer({
       schema,
-      plugins: [
-         {
-            async serverWillStart() {
-               return {
-                  async drainServer() {
-                     subscriptionServer.close(); //eslint-disable-line
-                  },
-               };
-            },
-         },
-      ],
       context: ({ req }) => {
          const isAuth = Auth(req);
          return {
@@ -80,27 +68,15 @@ async function startApolloServer() {
          };
       },
    });
-
-   const subscriptionServer = SubscriptionServer.create(
-      {
-         schema,
-         execute,
-         subscribe,
-      },
-      {
-         server: httpServer,
-         path: server.graphqlPath,
-      }
-   );
-
-   // Server Start
    await server.start();
-
-   // Apply Middlaware
    server.applyMiddleware({ app });
-   await new Promise((resolve) => app.listen({ port: PORT }, resolve));
-   console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`);
-   return { server, app };
-}
 
-startApolloServer();
+   SubscriptionServer.create({ schema, execute, subscribe }, { server: httpServer, path: server.graphqlPath });
+
+   httpServer.listen(PORT, () => {
+      console.log(`🚀 Query endpoint ready at http://localhost:${PORT}${server.graphqlPath}`);
+      console.log(`🚀 Subscription endpoint ready at ws://localhost:${PORT}${server.graphqlPath}`);
+   });
+
+   // Start incrementing
+})();
