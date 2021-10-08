@@ -1,5 +1,5 @@
 import express from 'express';
-import { ApolloServer, gql } from 'apollo-server-express';
+import { ApolloServer } from 'apollo-server-express';
 import { graphqlUploadExpress } from 'graphql-upload';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
@@ -10,6 +10,7 @@ import { createServer } from 'http';
 import { execute, subscribe } from 'graphql';
 import { SubscriptionServer } from 'subscriptions-transport-ws';
 import { PubSub } from 'graphql-subscriptions';
+import cors from 'cors';
 import Auth from './middleware/auth.js';
 import schema from './graphql/schema.js';
 
@@ -25,6 +26,7 @@ const client = redis.createClient(6379);
    const app = express();
    const httpServer = createServer(app);
 
+   app.use(cors());
    // Resolver map
    app.get('/', (req, res) => {
       res.redirect('/graphql');

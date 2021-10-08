@@ -52,11 +52,7 @@ const userResolvers = {
             const user = await User.findOne({ email });
 
             if (user) {
-               throw new UserInputError('Bu e-mail ile kayıtlı bir kullanıcı zaten var.', {
-                  errors: {
-                     email: 'Bu isimde bir e-mail var',
-                  },
-               });
+               throw new UserInputError('there is a user with this email.');
             }
             // hash password and save user to db
             const hashPassword = await bcrypt.hash(password, 10);

@@ -1,4 +1,4 @@
-import { EMAIL_REGEX, PASSWORD_REGEX } from '../lib/constants.js';
+import { EMAIL_REGEX } from '../lib/constants.js';
 
 const validateRegisterInputs = (username, email, password) => {
    const errors = {};
@@ -10,10 +10,8 @@ const validateRegisterInputs = (username, email, password) => {
    }
    if (email.trim() === '') {
       errors.email = 'E-mail boş olamaz';
-   } else {
-      if (!EMAIL_REGEX.test(email)) {
-         errors.email = 'E-mail adresi geçerli bir e-mail adresi olmalıdır';
-      }
+   } else if (!EMAIL_REGEX.test(email)) {
+      errors.email = 'E-mail adresi geçerli bir e-mail adresi olmalıdır';
    }
    // * returns errors
    return {
@@ -29,10 +27,8 @@ const validateLoginInputs = (email, password) => {
    }
    if (email.trim() === '') {
       errors.email = 'E-mail boş olamaz';
-   } else {
-      if (!EMAIL_REGEX.test(email)) {
-         errors.email = 'E-mail adresi geçerli bir e-mail adresi olmalıdır. Lütfen bilgileri kontrol edin.';
-      }
+   } else if (!EMAIL_REGEX.test(email)) {
+      errors.email = 'E-mail adresi geçerli bir e-mail adresi olmalıdır. Lütfen bilgileri kontrol edin.';
    }
    return {
       errors,

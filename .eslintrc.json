@@ -17,6 +17,7 @@
       "import/extensions": "off",
       "comma-dangle": "off",
       "max-len": ["error", { "code": 120, "tabWidth": 4 }],
-      "object-curly-newline": "off"
+      "object-curly-newline": "off",
+      "import/prefer-default-export": "warn"
    }
 }
