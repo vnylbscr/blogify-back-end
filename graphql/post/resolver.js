@@ -69,7 +69,11 @@ const postResolvers = {
             throw new Error('Post not found.');
          }
 
-         return foundPost;
+         const updatedPost = await Post.findByIdAndUpdate(_id, {
+            viewCount: foundPost.viewCount + 1,
+         });
+
+         return updatedPost;
       },
    },
    Mutation: {

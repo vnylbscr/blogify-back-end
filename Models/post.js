@@ -41,6 +41,10 @@ const postSchema = new Schema(
             ref: 'User',
          },
       ],
+      viewCount: {
+         type: Number,
+         defaultValue: 0,
+      },
    },
    { timestamps: true }
 );
