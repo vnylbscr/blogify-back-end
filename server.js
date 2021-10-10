@@ -21,7 +21,8 @@ Bluebird.promisifyAll(redis.RedisClient.prototype);
 Bluebird.promisifyAll(redis.Multi.prototype);
 
 const client = redis.createClient(6379);
-(async () => {
+
+const startApolloServer = async () => {
    const pubsub = new PubSub();
    const app = express();
    const httpServer = createServer(app);
@@ -79,6 +80,6 @@ const client = redis.createClient(6379);
       console.log(`🚀 Query endpoint ready at http://localhost:${PORT}${server.graphqlPath}`);
       console.log(`🚀 Subscription endpoint ready at ws://localhost:${PORT}${server.graphqlPath}`);
    });
+};
 
-   // Start incrementing
-})();
+startApolloServer();

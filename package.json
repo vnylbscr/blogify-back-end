@@ -4,7 +4,7 @@
    "description": "",
    "main": "index.js",
    "scripts": {
-      "test": "echo \"Error: no test specified\" && exit 1",
+      "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
       "start": "nodemon server.js",
       "lint": "eslint"
    },
@@ -38,10 +38,21 @@
       "subscriptions-transport-ws": "^0.9.19",
       "uuid": "^8.3.2"
    },
+   "env": {
+      "test": {
+         "plugins": [
+            "@babel/plugin-transform-modules-commonjs"
+         ]
+      }
+   },
    "devDependencies": {
+      "@babel/plugin-transform-modules-commonjs": "^7.15.4",
+      "@types/jest": "^27.0.2",
       "babel-eslint": "^10.1.0",
       "eslint": "^7.32.0",
       "eslint-config-airbnb-base": "^14.2.1",
-      "eslint-plugin-import": "^2.24.2"
+      "eslint-plugin-import": "^2.24.2",
+      "jest": "^27.2.5",
+      "superset": "^2.0.1"
    }
 }

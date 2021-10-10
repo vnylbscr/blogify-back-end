@@ -1,4 +1,3 @@
-import { AuthenticationError } from 'apollo-server-express';
 import jwt from 'jsonwebtoken';
 import { SO_SECRET_KEY } from '../utils/config.js';
 
