@@ -16,9 +16,9 @@ const postResolvers = {
             // pubsub,
          } = context;
          console.log('aga bu nbe', pubsub);
-         // if (!isAuth) {
-         //    throw new AuthenticationError(TOKEN_NOT_FOUND);
-         // }
+         if (!isAuth) {
+            throw new AuthenticationError(TOKEN_NOT_FOUND);
+         }
 
          const posts = await Post.find({}).sort({ createdAt: -1 }).populate('user');
 
@@ -53,6 +53,7 @@ const postResolvers = {
             isAuth: { isAuth },
             client,
          } = context;
+         console.log('is auth', isAuth);
          if (!isAuth) {
             throw new AuthenticationError(TOKEN_NOT_FOUND);
          }

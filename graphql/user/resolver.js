@@ -87,10 +87,10 @@ const userResolvers = {
             isAuth: { isAuth },
             client,
          } = context;
-         // const { isAuth, client } = context;
-         console.log('ömerto', context);
+
          const { email, password } = args.input;
          const user = await User.findOne({ email });
+
          if (!user) {
             throw new UserInputError('User not found. Please check your informations.');
          } else {

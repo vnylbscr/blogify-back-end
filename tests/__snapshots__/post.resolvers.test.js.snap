@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`POST resolvers should get all post from database 1`] = `undefined`;
