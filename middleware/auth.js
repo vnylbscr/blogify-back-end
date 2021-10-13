@@ -1,7 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { SO_SECRET_KEY } from '../utils/config.js';
 
-// @eslint-ignore
 const Auth = (request) => {
    const header = request.headers.authorization;
    if (!header) {

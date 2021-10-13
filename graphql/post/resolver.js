@@ -71,7 +71,7 @@ const postResolvers = {
          }
 
          const updatedPost = await Post.findByIdAndUpdate(_id, {
-            viewCount: foundPost.viewCount + 1,
+            viewCount: foundPost.viewCount > 0 ? foundPost.viewCount + 1 : 1,
          });
 
          return updatedPost;
