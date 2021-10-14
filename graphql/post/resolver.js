@@ -60,11 +60,9 @@ const postResolvers = {
 
          const { _id } = args;
 
-         const foundPost = await (
-            await Post.findOne({
-               _id,
-            })
-         ).populate('user');
+         const foundPost = await Post.findOne({
+            _id,
+         }).populate('user');
 
          if (!foundPost) {
             throw new Error('Post not found.');
@@ -72,7 +70,7 @@ const postResolvers = {
 
          const updatedPost = await Post.findByIdAndUpdate(_id, {
             viewCount: foundPost.viewCount > 0 ? foundPost.viewCount + 1 : 1,
-         });
+         }).populate('user');
 
          return updatedPost;
       },
