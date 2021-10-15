@@ -13,7 +13,9 @@ const uploadFileCloudinary = async (file, folder = 'blogify_media') => {
       });
    }
    // else provided file
-   const { createReadStream } = file;
+   const {
+      file: { createReadStream },
+   } = file;
    const res = await new Promise((resolve, reject) => {
       createReadStream().pipe(
          cloudinary.v2.uploader.upload_stream({ folder, unique_filename: true }, (error, result) => {

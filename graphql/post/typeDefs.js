@@ -36,7 +36,7 @@ const postTypeDefs = gql`
    }
    type Query {
       getAllPosts: [Post]
-      getAllPostsByPage(page: Int, limit: Int): PostPagination!
+      getAllPostsByPage(page: Int, limit: Int): PostPaginator!
       getUserPosts(user: ID!): [Post]
       getPost(_id: ID!): Post!
    }
@@ -53,19 +53,17 @@ const postTypeDefs = gql`
       deletedPost(data: SubscriptionInput!): Post
    }
 
-   type PostPagination {
-      posts: [Post]
-      paginator: Paginator
-   }
-
-   type Paginator {
-      data: [Post]
-      totalDocsCount: Int
+   type PostPaginator {
+      docs: [Post]
+      totalDocs: Int
       limit: Int
-      hasPrevPage: Boolean
+      page: Int
+      totalPages: Int
       hasNextPage: Boolean
-      pageNumber: Int
-      currentPage: Int
+      nextPage: Int
+      hasPrevPage: Boolean
+      prevPage: Int
+      pagingCounter: Int
    }
 
    input SubscriptionInput {

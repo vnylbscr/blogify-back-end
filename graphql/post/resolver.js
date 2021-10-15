@@ -15,12 +15,31 @@ const postResolvers = {
             client,
             // pubsub,
          } = context;
-         console.log('aga bu nbe', pubsub);
          if (!isAuth) {
             throw new AuthenticationError(TOKEN_NOT_FOUND);
          }
 
+         const { page, limit } = args;
+
          const posts = await Post.find({}).sort({ createdAt: -1 }).populate('user');
+
+         return posts;
+      },
+      getAllPostsByPage: async (_, args, context) => {
+         const {
+            isAuth: { isAuth },
+            client,
+            // pubsub,
+         } = context;
+         if (!isAuth) {
+            throw new AuthenticationError(TOKEN_NOT_FOUND);
+         }
+
+         const { page, limit } = args;
+
+         const posts = await Post.paginate({}, { page, limit, populate: 'user' });
+
+         console.log('pagintate posts', posts);
 
          return posts;
       },
@@ -100,9 +119,7 @@ const postResolvers = {
                throw new Error('user not found!');
             }
 
-            const { file } = await image;
-
-            const imageUrl = await uploadFileCloudinary(file);
+            const imageUrl = await uploadFileCloudinary(image);
 
             const newPost = new Post({
                user: userId,
