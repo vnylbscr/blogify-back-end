@@ -16,7 +16,6 @@
       "@graphql-tools/graphql-file-loader": "^7.0.5",
       "@graphql-tools/load": "^7.1.8",
       "@graphql-tools/schema": "^8.2.0",
-      "@types/mongoose": "^5.11.97",
       "@types/node": "^16.10.2",
       "apollo-server-express": "^3.0.0",
       "bcryptjs": "^2.4.3",
@@ -49,6 +48,7 @@
    "devDependencies": {
       "@babel/plugin-transform-modules-commonjs": "^7.15.4",
       "@types/jest": "^27.0.2",
+      "@types/mongoose": "^5.11.97",
       "babel-eslint": "^10.1.0",
       "easygraphql-tester": "^6.0.1",
       "eslint": "^7.32.0",

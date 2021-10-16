@@ -36,6 +36,10 @@ const postSchema = new Schema(
          type: Number,
          defaultValue: null,
       },
+      readTime: {
+         type: Number,
+         defaultValue: null,
+      },
       likedUsers: [
          {
             type: Schema.Types.ObjectId,

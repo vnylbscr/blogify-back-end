@@ -5,6 +5,7 @@ import Post from '../../Models/post.js';
 import { TOKEN_NOT_FOUND } from '../../lib/constants.js';
 import uploadFileCloudinary from '../../utils/cloudinaryUpload.js';
 import User from '../../Models/user.js';
+import { calculatePostReadTime } from '../../utils/helper.js';
 
 const pubsub = new PubSub();
 const postResolvers = {
@@ -37,7 +38,7 @@ const postResolvers = {
 
          const { page, limit } = args;
 
-         const posts = await Post.paginate({}, { page, limit, populate: 'user' });
+         const posts = await Post.paginate({}, { page, limit, populate: 'user', sort: { createdAt: -1 } });
 
          console.log('pagintate posts', posts);
 
@@ -121,7 +122,9 @@ const postResolvers = {
 
             const imageUrl = await uploadFileCloudinary(image);
 
-            const newPost = new Post({
+            const readTime = calculatePostReadTime(content);
+
+            const newPost = await new Post({
                user: userId,
                title,
                subtitle,
@@ -129,6 +132,7 @@ const postResolvers = {
                category,
                image: imageUrl,
                slug: slugify(title),
+               readTime,
             });
 
             const post = await (await newPost.save()).populate('user');

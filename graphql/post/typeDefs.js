@@ -15,6 +15,7 @@ const postTypeDefs = gql`
       likedCount: Int
       commentCount: Int
       likedUsers: [User]
+      readTime: String
    }
 
    input PostInput {
