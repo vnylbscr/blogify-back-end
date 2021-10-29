@@ -78,6 +78,10 @@ const userSchema = new Schema(
    { timestamps: true }
 );
 
+userSchema.pre('remove', () => {
+   
+   
+})
 const User = mongoose.model('User', userSchema, 'Users');
 
 export default User;

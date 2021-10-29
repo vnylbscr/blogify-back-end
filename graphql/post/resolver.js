@@ -1,20 +1,18 @@
 import { AuthenticationError, UserInputError } from 'apollo-server-express';
 import slugify from 'slugify';
-import { PubSub } from 'graphql-subscriptions';
 import Post from '../../Models/post.js';
 import { TOKEN_NOT_FOUND } from '../../lib/constants.js';
 import uploadFileCloudinary from '../../utils/cloudinaryUpload.js';
 import User from '../../Models/user.js';
 import { calculatePostReadTime } from '../../utils/helper.js';
 
-const pubsub = new PubSub();
 const postResolvers = {
    Query: {
       getAllPosts: async (_, args, context) => {
          const {
             isAuth: { isAuth },
             client,
-            // pubsub,
+            pubsub,
          } = context;
          if (!isAuth) {
             throw new AuthenticationError(TOKEN_NOT_FOUND);
@@ -30,7 +28,7 @@ const postResolvers = {
          const {
             isAuth: { isAuth },
             client,
-            // pubsub,
+            pubsub,
          } = context;
          if (!isAuth) {
             throw new AuthenticationError(TOKEN_NOT_FOUND);
@@ -49,6 +47,7 @@ const postResolvers = {
          const {
             isAuth: { isAuth },
             client,
+            pubsub,
          } = context;
 
          if (!isAuth) {
@@ -72,6 +71,7 @@ const postResolvers = {
          const {
             isAuth: { isAuth },
             client,
+            pubsub,
          } = context;
          console.log('is auth', isAuth);
          if (!isAuth) {
@@ -101,7 +101,7 @@ const postResolvers = {
             const {
                isAuth: { isAuth },
                client,
-               // pubsub,
+               pubsub,
             } = context;
 
             if (!isAuth) {
@@ -151,7 +151,7 @@ const postResolvers = {
          const {
             isAuth: { isAuth },
             client,
-            // pubsub,
+            pubsub,
          } = context;
 
          const { image } = data;
@@ -186,7 +186,7 @@ const postResolvers = {
          const {
             isAuth: { isAuth },
             client,
-            // pubsub,
+            pubsub,
          } = context;
 
          if (!isAuth) {
@@ -216,13 +216,22 @@ const postResolvers = {
    },
    Subscription: {
       createdPost: {
-         subscribe: (info, { token }, context) => pubsub.asyncIterator(['createdPost']),
+         subscribe: (info, { token }, context) => {
+            const { pubsub } = context;
+            pubsub.asyncIterator(['createdPost']);
+         },
       },
       updatedPost: {
-         subscribe: (info, { token }, context) => pubsub.asyncIterator(['updatedPost']),
+         subscribe: (info, { token }, context) => {
+            const { pubsub } = context;
+            pubsub.asyncIterator(['deletedPost']);
+         },
       },
       deletedPost: {
-         subscribe: (info, { token }, context) => pubsub.asyncIterator(['deletedPost']),
+         subscribe: (info, { token }, context) => {
+            const { pubsub } = context;
+            pubsub.asyncIterator(['deletedPost']);
+         },
       },
    },
 };
