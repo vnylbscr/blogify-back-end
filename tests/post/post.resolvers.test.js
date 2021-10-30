@@ -1,7 +1,7 @@
 import { ApolloServer } from 'apollo-server-express';
 import mongoose from 'mongoose';
-import schema from '../../graphql/schema.js';
 import { GET_ALL_POSTS, GET_SINGLE_POST } from './queries.js';
+import schema from '../../src/graphql/schema.js';
 
 describe('POST resolvers', () => {
    const server = new ApolloServer({

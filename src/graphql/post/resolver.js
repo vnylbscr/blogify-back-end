@@ -18,8 +18,6 @@ const postResolvers = {
             throw new AuthenticationError(TOKEN_NOT_FOUND);
          }
 
-         const { page, limit } = args;
-
          const posts = await Post.find({}).sort({ createdAt: -1 }).populate('user');
 
          return posts;

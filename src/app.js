@@ -2,7 +2,6 @@ import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import { graphqlUploadExpress } from 'graphql-upload';
 import dotenv from 'dotenv';
-import mongoose from 'mongoose';
 import cloudinary from 'cloudinary';
 import redis from 'redis';
 import Bluebird from 'bluebird';
@@ -13,6 +12,7 @@ import { PubSub } from 'graphql-subscriptions';
 import cors from 'cors';
 import Auth from './middleware/auth.js';
 import schema from './graphql/schema.js';
+import dbConnection from './utils/dbConnection.js';
 
 dotenv.config();
 Bluebird.promisifyAll(redis.RedisClient.prototype);
@@ -20,22 +20,14 @@ Bluebird.promisifyAll(redis.Multi.prototype);
 
 const client = redis.createClient(6379);
 
-// mongo
-mongoose
-   .connect(process.env.DB_URL, {
-      useUnifiedTopology: true,
-      useNewUrlParser: true,
-   })
-   .then(() => console.log('MongoDB Connected.'))
-   .catch((error) => console.log(error));
-// mongo db bağırma abi
-mongoose.set('useCreateIndex', true);
-
 const startApolloServer = async () => {
    const pubsub = new PubSub();
    const app = express();
    const httpServer = createServer(app);
 
+   dbConnection(process.env.DB_URL).then(() => {
+      console.log('DB Connected Successfully');
+   });
    app.use(cors());
    // Resolver map
    app.get('/', (req, res) => {

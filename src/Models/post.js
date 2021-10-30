@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import mongoosePaginate from 'mongoose-paginate-v2';
+import Comment from './comment.js';
 
 const { Schema } = mongoose;
 
@@ -55,6 +56,15 @@ const postSchema = new Schema(
 );
 
 postSchema.plugin(mongoosePaginate);
+
+postSchema.pre('remove', (next) => {
+   Comment.remove(
+      {
+         postId: this._id,
+      },
+      next
+   );
+});
 
 const Post = mongoose.model('Post', postSchema, 'Post');
 

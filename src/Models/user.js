@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import Post from './post.js';
 
 const { Schema } = mongoose;
 const userSchema = new Schema(
@@ -78,10 +79,15 @@ const userSchema = new Schema(
    { timestamps: true }
 );
 
-userSchema.pre('remove', () => {
-   
-   
-})
+userSchema.pre('remove', async (next) => {
+   Post.remove(
+      {
+         user: this._id,
+      },
+      next
+   );
+});
+
 const User = mongoose.model('User', userSchema, 'Users');
 
 export default User;
