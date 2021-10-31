@@ -134,7 +134,20 @@ const userResolvers = {
             { new: true }
          );
 
+         pubsub.publish('updatedMe', {
+            updatedMe: doc,
+         });
+
          return doc;
+      },
+   },
+
+   Subscription: {
+      updatedMe: {
+         subscribe: (info, { token }, context) => {
+            const { pubsub } = context;
+            pubsub.asyncIterator(['updatedMe']);
+         },
       },
    },
 };

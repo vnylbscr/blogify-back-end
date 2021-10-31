@@ -1,5 +1,7 @@
-export const GET_ALL_POSTS = `
-query GetAllPosts {
+import { gql } from 'apollo-server-express';
+
+export const GET_ALL_POSTS = gql`
+   query GetAllPosts {
       getAllPosts {
          _id
          title
@@ -12,9 +14,6 @@ query GetAllPosts {
             likedCount
             createdAt
          }
-         user {
-            ...CoreUserFields
-         }
          category
          createdAt
          slug
@@ -22,8 +21,8 @@ query GetAllPosts {
    }
 `;
 
-export const GET_SINGLE_POST = `
-query getSinglePostQuery($_id: ID!) {
+export const GET_SINGLE_POST = gql`
+   query getSinglePostQuery($_id: ID!) {
       getPost(_id: $_id) {
          _id
          title

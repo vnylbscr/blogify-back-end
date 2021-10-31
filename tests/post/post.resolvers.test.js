@@ -2,23 +2,32 @@ import { ApolloServer } from 'apollo-server-express';
 import mongoose from 'mongoose';
 import { GET_ALL_POSTS, GET_SINGLE_POST } from './queries.js';
 import schema from '../../src/graphql/schema.js';
+import createApolloServer from '../test-utils/createApolloServer.js';
 
 describe('POST resolvers', () => {
-   const server = new ApolloServer({
-      schema,
+   let server;
+
+   beforeAll(async () => {
+      server = createApolloServer();
+   });
+
+   afterAll(async () => {
+      await mongoose.disconnect();
    });
 
    test('should get all post from database', async () => {
-      const result = await server.executeOperation(
-         {
-            query: GET_ALL_POSTS,
-         },
-         () => ({
-            isAuth: {
-               isAuth: true,
-            },
-         })
-      );
-      expect(result?.data?.getAllPosts).toBe([]);
+      const result = await server.executeOperation({
+         query: GET_ALL_POSTS,
+      });
+      // console.log('result', result);
+      expect(result?.data?.getAllPosts).toBeNull();
+   });
+
+   test('should return status 400', async () => {
+      const result = await server.executeOperation({
+         query: GET_ALL_POSTS,
+      });
+      // console.log('result', result);
+      expect(result?.data?.getAllPosts).toBeDefined();
    });
 });
