@@ -7,6 +7,7 @@ Backend repo for the [blogify](https://github.com/vnylbscr/blogify) app.
 
  - Node.js
  - Apollo GraphQL Server
+ - GraphQL
  - MongoDB
  - Dependency Injection
  - JSON Web Token
