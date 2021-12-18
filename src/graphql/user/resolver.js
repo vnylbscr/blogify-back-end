@@ -1,4 +1,5 @@
-import { UserInputError, AuthenticationError } from 'apollo-server-express';
+import mongoose from 'mongoose';
+import { AuthenticationError, ForbiddenError, UserInputError } from 'apollo-server-express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { TOKEN_NOT_FOUND } from '../../lib/constants.js';
@@ -28,6 +29,27 @@ const userResolvers = {
             };
          } catch (error) {
             throw new AuthenticationError('Token geçersiz yada süresi dolmuş');
+         }
+      },
+      getUser: async (parent, args, context) => {
+         try {
+            const {
+               isAuth: { isAuth },
+               client,
+            } = context;
+            const { userId } = args;
+
+            const user = await User.findById(mongoose.Types.ObjectId(userId));
+
+            if (!user) {
+               throw new ForbiddenError('User not found');
+            }
+
+            return {
+               ...user.toObject(),
+            };
+         } catch (error) {
+            throw new Error(error.message);
          }
       },
    },

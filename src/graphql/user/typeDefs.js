@@ -73,6 +73,9 @@ const userTypeDefs = gql`
       login(input: LoginInput): User!
       editProfile(input: UserPersonalInput): User!
    }
+   type Subscription {
+      updatedMe(input: UserPersonalInput): User!
+   }
 `;
 
 export default userTypeDefs;

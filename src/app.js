@@ -60,6 +60,18 @@ const startApolloServer = async () => {
             pubsub,
          };
       },
+      formatError: (error) => {
+         return {
+            message: error.message,
+            status: false,
+            error: true,
+         };
+      },
+      // formatResponse: (graphqlData) => ({
+      //    data: graphqlData.data,
+      //    status: true,
+      //    code: graphqlData.http.status,
+      // }),
    });
    await server.start();
    server.applyMiddleware({ app });
