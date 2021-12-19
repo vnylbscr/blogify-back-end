@@ -1,8 +1,6 @@
-import { ApolloServer } from 'apollo-server-express';
 import mongoose from 'mongoose';
-import { GET_ALL_POSTS, GET_SINGLE_POST } from './queries.js';
-import schema from '../../src/graphql/schema.js';
 import createApolloServer from '../test-utils/createApolloServer.js';
+import { GET_ALL_POSTS } from './queries.js';
 
 describe('POST resolvers', () => {
    let server;

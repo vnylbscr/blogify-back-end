@@ -19,7 +19,7 @@ const userTypeDefs = gql`
       instagramUrl: String
       twitterUrl: String
       githubUrl: String
-      createdAt: String
+      createdAt: Date
       birthDay: Date
       interests: [String]
       location: Location
@@ -63,7 +63,7 @@ const userTypeDefs = gql`
 
    # Get User With ID
    type Query {
-      getUser(userID: ID!): User!
+      getUser(_id: ID!): User!
       getMeWithToken(token: String!): User!
    }
 

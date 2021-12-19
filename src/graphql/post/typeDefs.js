@@ -9,7 +9,7 @@ const postTypeDefs = gql`
       image: String
       comments: [Comment]
       category: [String]
-      createdAt: String
+      createdAt: Date
       slug: String
       user: User
       likedCount: Int

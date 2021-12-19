@@ -37,9 +37,11 @@ const userResolvers = {
                isAuth: { isAuth },
                client,
             } = context;
-            const { userId } = args;
+            const { _id } = args;
 
-            const user = await User.findById(mongoose.Types.ObjectId(userId));
+            console.log('user id is', args);
+
+            const user = await User.findById(mongoose.Types.ObjectId(_id));
 
             if (!user) {
                throw new ForbiddenError('User not found');
