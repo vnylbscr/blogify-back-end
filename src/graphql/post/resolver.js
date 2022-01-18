@@ -1,55 +1,39 @@
 import { AuthenticationError, UserInputError } from 'apollo-server-express';
 import slugify from 'slugify';
-import Post from '../../Models/post.js';
 import { TOKEN_NOT_FOUND } from '../../lib/constants.js';
-import uploadFileCloudinary from '../../utils/cloudinaryUpload.js';
+import Post from '../../Models/post.js';
 import User from '../../Models/user.js';
+import uploadFileCloudinary from '../../utils/cloudinaryUpload.js';
 import { calculatePostReadTime } from '../../utils/helper.js';
 
 const postResolvers = {
    Query: {
-      getAllPosts: async (_, args, context) => {
-         const {
-            isAuth: { isAuth },
-            client,
-            pubsub,
-         } = context;
-         if (!isAuth) {
-            throw new AuthenticationError(TOKEN_NOT_FOUND);
-         }
-
-         const posts = await Post.find({}).sort({ createdAt: -1 }).populate('user');
-
-         return posts;
-      },
       getAllPostsByPage: async (_, args, context) => {
          const {
             isAuth: { isAuth },
-            client,
-            pubsub,
          } = context;
          if (!isAuth) {
             throw new AuthenticationError(TOKEN_NOT_FOUND);
          }
-
          const { page, limit } = args;
-
          const posts = await Post.paginate({}, { page, limit, populate: 'user', sort: { createdAt: -1 } });
-
-         console.log('pagintate posts', posts);
-
          return posts;
       },
 
       getUserPosts: async (_, { user }, context) => {
          const {
             isAuth: { isAuth },
-            client,
-            pubsub,
+            client: redisClient,
          } = context;
 
          if (!isAuth) {
             throw new AuthenticationError(TOKEN_NOT_FOUND);
+         }
+
+         const getCachedData = await redisClient.getAsync('getUserPosts');
+
+         if (getCachedData) {
+            return JSON.parse(getCachedData);
          }
 
          const foundUser = await User.findById(user);
@@ -62,21 +46,27 @@ const postResolvers = {
             user,
          }).populate('user');
 
+         await redisClient.set('getUserPosts', JSON.stringify(posts));
+
          return posts;
       },
 
       getPost: async (parent, args, context) => {
          const {
             isAuth: { isAuth },
-            client,
-            pubsub,
+            client: redisClient,
          } = context;
-         console.log('is auth', isAuth);
          if (!isAuth) {
             throw new AuthenticationError(TOKEN_NOT_FOUND);
          }
 
          const { _id } = args;
+
+         const getCachedData = await redisClient.getAsync('getPost');
+
+         if (getCachedData) {
+            return JSON.parse(getCachedData);
+         }
 
          const foundPost = await Post.findOne({
             _id,
@@ -90,6 +80,8 @@ const postResolvers = {
             viewCount: foundPost.viewCount > 0 ? foundPost.viewCount + 1 : 1,
          }).populate('user');
 
+         await redisClient.set('getPost', JSON.stringify(updatedPost));
+
          return updatedPost;
       },
    },
@@ -98,7 +90,6 @@ const postResolvers = {
          try {
             const {
                isAuth: { isAuth },
-               client,
                pubsub,
             } = context;
 
@@ -122,7 +113,7 @@ const postResolvers = {
 
             const readTime = calculatePostReadTime(content);
 
-            const newPost = await new Post({
+            const newPost = new Post({
                user: userId,
                title,
                subtitle,
@@ -133,7 +124,7 @@ const postResolvers = {
                readTime,
             });
 
-            const post = await (await newPost.save()).populate('user');
+            const post = (await newPost.save()).populate('user');
 
             pubsub.publish('createdPost', {
                createdPost: post,
@@ -148,7 +139,6 @@ const postResolvers = {
       updatePost: async (info, { data }, context) => {
          const {
             isAuth: { isAuth },
-            client,
             pubsub,
          } = context;
 
@@ -183,7 +173,6 @@ const postResolvers = {
       deletePost: async (info, { data }, context) => {
          const {
             isAuth: { isAuth },
-            client,
             pubsub,
          } = context;
 
@@ -214,19 +203,19 @@ const postResolvers = {
    },
    Subscription: {
       createdPost: {
-         subscribe: (info, { token }, context) => {
+         subscribe: (info, context) => {
             const { pubsub } = context;
             pubsub.asyncIterator(['createdPost']);
          },
       },
       updatedPost: {
-         subscribe: (info, { token }, context) => {
+         subscribe: (info, context) => {
             const { pubsub } = context;
             pubsub.asyncIterator(['deletedPost']);
          },
       },
       deletedPost: {
-         subscribe: (info, { token }, context) => {
+         subscribe: (info, context) => {
             const { pubsub } = context;
             pubsub.asyncIterator(['deletedPost']);
          },

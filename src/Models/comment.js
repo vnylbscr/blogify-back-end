@@ -5,17 +5,13 @@ const { Schema } = mongoose;
 const commentSchema = new Schema(
    {
       content: { type: String, defaultValue: null },
-      postId: {
+      post: {
          type: Schema.Types.ObjectId,
          ref: 'Post',
       },
-      userId: {
+      user: {
          type: Schema.Types.ObjectId,
          ref: 'User',
-      },
-      likedCount: {
-         type: Number,
-         defaultValue: 0,
       },
    },
    { timestamps: true }

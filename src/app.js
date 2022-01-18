@@ -44,6 +44,7 @@ const startApolloServer = async () => {
    client.on('error', (error) => {
       console.log(error);
    });
+
    cloudinary.v2.config({
       cloud_name: process.env.CLOUD_NAME,
       api_key: process.env.CLOUD_API_KEY,
@@ -60,18 +61,6 @@ const startApolloServer = async () => {
             pubsub,
          };
       },
-      formatError: (error) => {
-         return {
-            message: error.message,
-            status: false,
-            error: true,
-         };
-      },
-      // formatResponse: (graphqlData) => ({
-      //    data: graphqlData.data,
-      //    status: true,
-      //    code: graphqlData.http.status,
-      // }),
    });
    await server.start();
    server.applyMiddleware({ app });

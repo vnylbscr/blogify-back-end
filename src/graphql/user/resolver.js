@@ -9,17 +9,9 @@ import { validateRegisterInputs } from '../../utils/validateUser.js';
 
 const userResolvers = {
    Query: {
-      getMeWithToken: async (parent, args, context) => {
+      getMeWithToken: async (parent, args, _) => {
          try {
-            const {
-               isAuth: { isAuth },
-               client,
-            } = context;
             const { token } = args;
-
-            if (!token) {
-               throw new AuthenticationError(TOKEN_NOT_FOUND);
-            }
 
             const user = jwt.verify(token, SO_SECRET_KEY);
 
@@ -28,18 +20,12 @@ const userResolvers = {
                ...res.toObject(),
             };
          } catch (error) {
-            throw new AuthenticationError('Token geçersiz yada süresi dolmuş');
+            throw new AuthenticationError(TOKEN_NOT_FOUND);
          }
       },
-      getUser: async (parent, args, context) => {
+      getUser: async (parent, args, _) => {
          try {
-            const {
-               isAuth: { isAuth },
-               client,
-            } = context;
             const { _id } = args;
-
-            console.log('user id is', args);
 
             const user = await User.findById(mongoose.Types.ObjectId(_id));
 
@@ -57,16 +43,11 @@ const userResolvers = {
    },
    Mutation: {
       // REGISTER USER
-      register: async (parent, args, context) => {
+      register: async (parent, args, _) => {
          try {
-            const {
-               isAuth: { isAuth },
-               client,
-            } = context;
             const { username, email, password } = args.input;
 
             console.log(username);
-            // Validate the user
             const { errors, isValid } = validateRegisterInputs(username, email, password);
 
             if (!isValid) {
@@ -106,12 +87,7 @@ const userResolvers = {
          }
       },
       // LOGIN USER
-      login: async (parent, args, context) => {
-         const {
-            isAuth: { isAuth },
-            client,
-         } = context;
-
+      login: async (parent, args, _) => {
          const { email, password } = args.input;
          const user = await User.findOne({ email });
 
@@ -142,11 +118,10 @@ const userResolvers = {
       editProfile: async (_, { data }, context) => {
          const {
             isAuth: { isAuth },
-            client,
             pubsub,
          } = context;
 
-         if (isAuth) {
+         if (!isAuth) {
             throw new AuthenticationError(TOKEN_NOT_FOUND);
          }
 
@@ -168,7 +143,7 @@ const userResolvers = {
 
    Subscription: {
       updatedMe: {
-         subscribe: (info, { token }, context) => {
+         subscribe: (info, context) => {
             const { pubsub } = context;
             pubsub.asyncIterator(['updatedMe']);
          },
